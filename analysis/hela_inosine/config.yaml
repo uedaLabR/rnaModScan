@@ -1,0 +1,12 @@
+assembly: GRCh38
+sample: HeLa_WT
+predictions: ../../results/prediction_HeLa_WT_HEKonly_v2/predictions/inosine/all_predictions.tsv
+prediction_run: ../../results/prediction_HeLa_WT_HEKonly_v2/run.json
+slic: ../../data/reference_sites_GRCh38/by_method/HeLa_inosine_Slic-seq_GRCh38.bed
+coverage: ../../results/paper_callable_v1/HeLa_WT/reference_coverage.tsv
+coverage_run: ../../results/paper_callable_v1/HeLa_WT/run.json
+coverage_sources: ../../results/paper_callable_v1/HeLa_WT/sources.json
+rmsk: /mnt/ssdnas07/pipeline/rna_modscore_v2/source/repeat/hg38_rmsk.txt
+genome_fai: /share/reference/hg38.fa.fai
+output: ../../paper/data/hela_inosine_comparison_20261108
+figures: ../../paper/figures/hela_inosine_comparison_20261108

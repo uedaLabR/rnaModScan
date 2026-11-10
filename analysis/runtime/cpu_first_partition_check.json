@@ -1,0 +1,90 @@
+{
+  "status": "complete_with_numerical_differences",
+  "partition": {
+    "chrom": "chr1",
+    "strand": "+"
+  },
+  "rows": 24899,
+  "row_ids_equal": true,
+  "predicted_classes_equal": false,
+  "predicted_class_disagreements": 1,
+  "max_absolute_probability_difference": 0.0035049021244049072,
+  "mean_absolute_probability_difference": 2.7931935619562864e-05,
+  "probability_difference_quantiles": {
+    "0.5": 3.088280209340155e-07,
+    "0.95": 0.00017920718528330326,
+    "0.99": 0.0004280314315110445,
+    "0.999": 0.0010498091578483582
+  },
+  "per_class": {
+    "score_m6A": {
+      "max_absolute_difference": 0.0027145743370056152,
+      "mean_absolute_difference": 3.5238095733802766e-05
+    },
+    "score_inosine": {
+      "max_absolute_difference": 0.0035049021244049072,
+      "mean_absolute_difference": 6.894131729495712e-06
+    },
+    "score_false_positive": {
+      "max_absolute_difference": 0.0034981966018676758,
+      "mean_absolute_difference": 4.166358121437952e-05
+    }
+  },
+  "finite_scores": true,
+  "within_zero_one": true,
+  "max_probability_sum_error": 2.384185791015625e-07,
+  "cpu_source": "/home/ueda/PycharmProjects/rnaModScan/results/benchmark_HeLa_CPU_20261109/scores/adenine/chrom=chr1/strand=plus/scores.parquet",
+  "gpu_source": "/home/ueda/PycharmProjects/rnaModScan/results/prediction_HeLa_WT_HEKonly_v2/scores/adenine/chrom=chr1/strand=plus/scores.parquet",
+  "cpu_file_sha256": "0a774035fbc468821484d988ca0b227625b5d541620b6504e1835a87a435eb56",
+  "gpu_file_sha256": "0fdc7307ac420cbd2a713d8ca0e0845ad098e86d381a2328fe0eaa4beb0296e4",
+  "input_manifest_sha256_unchanged": true,
+  "model_weights_sha256_unchanged": true,
+  "cpu_execution": {
+    "device": "cpu",
+    "intra_threads": 4,
+    "inter_threads": 1,
+    "batch_sites": 16,
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "-1",
+      "TF_NUM_INTRAOP_THREADS": "4",
+      "TF_NUM_INTEROP_THREADS": "1",
+      "OMP_NUM_THREADS": "4",
+      "OPENBLAS_NUM_THREADS": "1"
+    }
+  },
+  "core_source_files_unchanged": {
+    "prediction/scoring.py": true,
+    "prediction/runtime.py": true,
+    "utils/nn/keras_site.py": true,
+    "utils/features/site_tensors.py": true,
+    "utils/features/compact_inputs.py": true
+  },
+  "class_disagreement_rows": [
+    {
+      "row_id": "HeLa_WT|chr1:23077348:+:adenine",
+      "cpu_class": "false_positive",
+      "gpu_class": "m6A",
+      "cpu_scores": [
+        0.4997032582759857,
+        0.00017415251932106912,
+        0.5001225471496582
+      ],
+      "gpu_scores": [
+        0.5000593066215515,
+        0.0001741888845572248,
+        0.4997665286064148
+      ],
+      "cpu_top_two_margin": 0.00041928887367248535,
+      "gpu_top_two_margin": 0.00029277801513671875
+    }
+  ],
+  "argmax_agreement_fraction": 0.9999598377444877,
+  "core_source_matches_original_gpu_archive": {
+    "prediction/scoring.py": true,
+    "prediction/runtime.py": true,
+    "utils/nn/keras_site.py": true,
+    "utils/features/site_tensors.py": true,
+    "utils/features/compact_inputs.py": true
+  },
+  "interpretation": "Same source inputs, model and inference code; small CPU/GPU score differences and a near-boundary class difference observed. Device-specific arithmetic is a possible explanation, not independently proven here. This is a first-partition check, not full-run equality."
+}

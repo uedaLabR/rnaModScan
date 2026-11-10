@@ -1,0 +1,5 @@
+assembly: GRCh38
+membership: ../../paper/data/hela_inosine_comparison_20261108/inosine_membership.tsv
+annotation: /mnt/ssdnas07/pipeline/rna_modscore_v2/source/gencode.v44.annotation.gff3
+output: ../../paper/data/hela_inosine_regions_20261108
+figures: ../../paper/figures/hela_inosine_regions_20261108

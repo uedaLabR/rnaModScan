@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "assembly": "GRCh38",
+  "created_at": "2026-10-27T07:31:26.275177+00:00",
+  "catalog": "data/references/catalog.json",
+  "source_count": 15,
+  "files": [
+    {
+      "path": "analysis/reference_catalog/check_server_references.py",
+      "bytes": 2311,
+      "sha256": "83af5abad1ea4c3514d88750bb36d19cd5f08c7ed4a6186a501d6670e842b23b"
+    },
+    {
+      "path": "analysis/reference_catalog/SERVER_UPLOAD.md",
+      "bytes": 4079,
+      "sha256": "5dfb1c54033d2231e82730812409cebebdcb730946278a3babb3ee85e292ac8a"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HEK293T_inosine_Slic-seq_GRCh38.bed",
+      "bytes": 12731514,
+      "sha256": "95f838b1597b46bedc83f856b3c949fbd1a8b60ba11b0fba3dfca4d4b0610ec7"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HEK293T_m5C_m5C-TAC-seq_GRCh38.bed",
+      "bytes": 104771,
+      "sha256": "1bbc32a197aa7abbeb04f7ebc6cc6f0b0cd1018f507c32309c00b716e048d53a"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HEK293T_m6A_GLORI_GRCh38.bed",
+      "bytes": 11594162,
+      "sha256": "788a07f6d9d35692805dce943d36ab7ff22b9bdeb961d9b84af904d9ce45afd1"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HEK293T_psi_BID-seq_GRCh38.bed",
+      "bytes": 25911,
+      "sha256": "f9a032996c94f12b5cad32c0a4d803e8d8caa3e886d298c6772960780c6c2c6a"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HEK293T_psi_PRAISE_GRCh38.bed",
+      "bytes": 39874,
+      "sha256": "0720df5b0965f43406912f8ca9b117042156025a6e29e215b38add274f384c56"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HeLa_inosine_BACS_GRCh38.bed",
+      "bytes": 51330,
+      "sha256": "b0b34785a02a7035bb09a8e69092d3e4f0c08687e2fda9b6e71cbf3d0c776835"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HeLa_inosine_Slic-seq_GRCh38.bed",
+      "bytes": 1312249,
+      "sha256": "02956ee5fb2e45397378cc3818302cab099e4bb45b71cd062e8c21a12999bd1d"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HeLa_m5C_m5C-TAC-seq_GRCh38.bed",
+      "bytes": 258829,
+      "sha256": "f47644141241960b75c8e03c6153d9e673ca8b54b7496aec7df2e24b5ce4603e"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HeLa_m6A_GLORI_GRCh38.bed",
+      "bytes": 7054892,
+      "sha256": "3fff6baecffe62cc3e07c7d1969ecd6d7945eb3db602189309461b783990c96f"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HeLa_psi_BACS_GRCh38.bed",
+      "bytes": 55908,
+      "sha256": "93925b0a055f2b2dea51f94b66425905b826347dc452066c64ff7479ffebf891"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/by_method/HeLa_psi_BID-seq_GRCh38.bed",
+      "bytes": 25703,
+      "sha256": "05a0f14cbcbdabaa634d330c8ad9b364df4750706208ed335cd99c3a57d27a1e"
+    },
+    {
+      "path": "data/reference_sites_GRCh38/sources.json",
+      "bytes": 6661,
+      "sha256": "ad94d1e9db0c5588c7da1d6e97038a93573f17b09187e060144d6c3da35ba7c0"
+    },
+    {
+      "path": "data/references/catalog.json",
+      "bytes": 5829,
+      "sha256": "1eb11774e180de184519a1b724da76d95cfd86095982da6bd931593aa70a9ce1"
+    },
+    {
+      "path": "references/rmbase3/import.json",
+      "bytes": 2511,
+      "sha256": "bc641a1490834176abf6668d66d0dfc5aa9a5abab14c09cdf38a15de33c50022"
+    },
+    {
+      "path": "references/rmbase3/inosine.GRCh38.bed",
+      "bytes": 7507311,
+      "sha256": "ea44269fa702eab4561bb4f1d7488e8925ac27a73b928c3aa37ea8596f047d31"
+    },
+    {
+      "path": "references/rmbase3/m5C.GRCh38.bed",
+      "bytes": 2001489,
+      "sha256": "52dc1dde5d4bc543f69d14fd0cff67e0b826533347b62425ab38fa6e6dd35fd6"
+    },
+    {
+      "path": "references/rmbase3/m6A.GRCh38.bed",
+      "bytes": 39487264,
+      "sha256": "290cc91059fb120b3117c0587e24ef2df09c2aa56309170d3cc91e149fdd9922"
+    },
+    {
+      "path": "references/rmbase3/pseU.GRCh38.bed",
+      "bytes": 260431,
+      "sha256": "27fc4975c90465faeae38e459d690dc09aa399efc642fc744ef33db419dfc721"
+    }
+  ],
+  "note": "Prepared reference data only; no pileup, genome, source archives, or raw assay tables."
+}

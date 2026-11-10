@@ -1,0 +1,118 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.env
+.env.*
+!.env.example
+.local/
+configs/local/
+build/
+dist/
+data/raw/
+data/processed/
+runs/
+*.bam
+*.sam
+*.cram
+*.bai
+*.crai
+*.pod5
+*.fast5
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+*.fasta
+*.fasta.gz
+*.fa
+*.fa.gz
+*.fai
+*.pt
+*.pth
+*.ckpt
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+results/
+data/reference_sites_GRCh38/
+data/reference_sites_mm10/
+reference
+
+# PyCharm
+.idea/
+
+# Archives / temporary transfer files
+*.zip
+
+# Isolated optional m6Anet tool environments
+.m6anet_tools/
+.venv_m6anet/
+.venv_bluecrab/
+analysis/m6anet/tools_explicit.txt
+
+# Large reference files
+/source/hg38.m6A.tar.gz
+/references/rmbase3/m6A.provenance.tsv
+
+# Python virtual environments
+/.venv*/
+/.m6anet_py38/
+
+# Other Python environments and development caches
+venv/
+env/
+.tox/
+.nox/
+__pypackages__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.cache/
+.ipynb_checkpoints/
+
+# Local credentials and assistant state
+/.aws/
+/.ssh/
+/.gnupg/
+/.codex/
+/.agents/
+/credentials.json
+/token.json
+/client_secret*.json
+/service-account*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Reproducible reference imports and human source downloads
+/references/rmbase3/
+/source/hg38.*.tar.gz
+/data/validation/
+analysis/**/results/
+
+# Generated tensors, model weights and intermediate caches
+*.parquet
+*.npy
+*.npz
+*.keras
+*.h5
+*.hdf5
+
+# Local manuscript work, scripts, snapshots and transfer records
+/paper/
+/manuscript/
+/PAPER_OUTLINE.md
+/HANDOFF.md
+/AGENTS.md
+/TRANSFER_MANIFEST.json
+/migration_2026-10-23.json
+/prediction/RELEASE_PLAN.md
+# These manuscript-only helpers require the excluded paper/scripts package.
+/analysis/hela_features/summarize_neighbor_features.py
+/analysis/hela_features/summarize_all_modification_scores.py
+/tests/test_paper_callable_evidence.py

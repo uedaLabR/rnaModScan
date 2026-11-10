@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "synthetic_demo": true,
+  "genome": "GRCh38",
+  "target_modifications": ["m6A", "inosine"],
+  "flank": 20,
+  "samples": "../examples/demo/samples.csv",
+  "evidence": "../examples/demo/evidence.csv",
+  "splits": "../examples/demo/splits.csv",
+  "label_policy": {
+    "min_long_depth": 10,
+    "min_short_depth": 20,
+    "allowed_truth_matches": ["same_rna", "same_condition", "same_cell_line"],
+    "quantitative_thresholds": {
+      "m6A": {"positive_min": 0.10, "negative_max": 0.01}
+    }
+  }
+}

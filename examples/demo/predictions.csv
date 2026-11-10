@@ -1,0 +1,9 @@
+model_id,sample_id,chrom,pos0,strand,modification,score
+synthetic_scores,demo_wt,chr1,100,+,m6A,0.90
+synthetic_scores,demo_ivt,chr1,100,+,m6A,0.60
+synthetic_scores,demo_wt,chr1,200,+,m6A,0.10
+synthetic_scores,demo_wt,chr1,300,-,m6A,0.80
+synthetic_scores,demo_wt,chr1,500,+,inosine,0.70
+synthetic_scores,demo_ivt,chr1,500,+,inosine,0.20
+synthetic_scores,demo_external,chr1,100,+,m6A,0.80
+synthetic_scores,demo_external,chr1,300,-,m6A,0.10

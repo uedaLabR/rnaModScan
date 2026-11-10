@@ -1,0 +1,123 @@
+{
+  "status": "complete",
+  "audit_scope": "Read-only original GPU baseline; no CPU benchmark executed by this audit",
+  "source_root": "/home/ueda/PycharmProjects/rnaModScan/results/prediction_HeLa_WT_HEKonly_v2",
+  "stages": {
+    "candidates": {
+      "started_utc": "2026-11-07T14:42:23.336547+00:00",
+      "finished_utc": "2026-11-07T15:05:48.378530+00:00",
+      "wall_seconds": 1405.041983,
+      "wall_minutes": 23.417366383333334
+    },
+    "features": {
+      "started_utc": "2026-11-07T15:05:48.380063+00:00",
+      "finished_utc": "2026-11-07T16:29:42.060134+00:00",
+      "wall_seconds": 5033.680071,
+      "wall_minutes": 83.89466784999999
+    },
+    "annotation": {
+      "started_utc": "2026-11-07T16:29:42.063007+00:00",
+      "finished_utc": "2026-11-07T16:31:26.862686+00:00",
+      "wall_seconds": 104.799679,
+      "wall_minutes": 1.7466613166666667
+    },
+    "inputs": {
+      "started_utc": "2026-11-07T16:31:26.864661+00:00",
+      "finished_utc": "2026-11-07T16:38:22.685896+00:00",
+      "wall_seconds": 415.821235,
+      "wall_minutes": 6.930353916666666
+    },
+    "infer": {
+      "started_utc": "2026-11-07T16:38:22.722080+00:00",
+      "finished_utc": "2026-11-07T17:01:06.320182+00:00",
+      "wall_seconds": 1363.598102,
+      "wall_minutes": 22.72663503333333
+    },
+    "filter": {
+      "started_utc": "2026-11-07T17:01:06.360619+00:00",
+      "finished_utc": "2026-11-07T17:24:14.463869+00:00",
+      "wall_seconds": 1388.10325,
+      "wall_minutes": 23.135054166666666
+    }
+  },
+  "entire_workflow_wall_seconds": 9711.169922,
+  "non_inference_workflow_seconds": 8347.57182,
+  "inference_scope": "Fresh subprocess startup, config/runtime/TensorFlow/model loading, prepared Parquet reads, lossless integer-to-float restoration, RAM padding, NN calls, score Parquet writes, clear_session/process exit. Not GPU-kernel-only time.",
+  "inference_runtime": {
+    "requested_device": "gpu",
+    "device": "gpu",
+    "cpu_threads": 4,
+    "gpu_devices": [
+      "/device:GPU:0"
+    ],
+    "tensorflow_version": "2.10.1"
+  },
+  "batch_sites": 16,
+  "tensorflow_intra_op_threads": 4,
+  "tensorflow_inter_op_threads": 1,
+  "prepared": {
+    "path": "/home/ueda/PycharmProjects/rnaModScan/results/prediction_HeLa_WT_HEKonly_v2/nn_inputs/adenine",
+    "schema": "prediction_inputs_v9",
+    "layout": "site_bags_parquet_v4",
+    "run_sha256": "1f11822969ef4eaa788d24702649ce7111427bd37cac069760ab10607cd15102",
+    "index_sha256": "943c3a6e69b7bf3b27454b9ec1abf97fb56978524d1a492c5c860d6269445211",
+    "model": {
+      "run_sha256": "93833c11ae35469b38c267ead185afcbda5f7875bf034cac7c34f225cd5b6853",
+      "model_sha256": "f7d4db59edc72f5df8ed361bfb1475a4d384b7a91cf06d06764dc0d55cd5af1d"
+    },
+    "partitions": 193,
+    "site_count": 507501,
+    "input_count": 507501,
+    "shards": 3017,
+    "shard_bytes": 5383370986,
+    "site_metadata_bytes": 44198330,
+    "retained_read_site_windows": 38999863
+  },
+  "scores": {
+    "path": "/home/ueda/PycharmProjects/rnaModScan/results/prediction_HeLa_WT_HEKonly_v2/scores/adenine",
+    "schema": "prediction_scores_v1",
+    "partitions": 193,
+    "rows": 507501,
+    "bytes": 43762859,
+    "decision_rule": "argmax; threshold unused",
+    "columns": [
+      "row_id",
+      "score_m6A",
+      "score_inosine",
+      "score_false_positive",
+      "predicted_class"
+    ]
+  },
+  "sampled_resources": {
+    "source": "/home/ueda/PycharmProjects/rnaModScan/results/runtime_HeLa_v2_20261107T144307Z",
+    "samples": 45,
+    "interval_seconds": 30,
+    "peak_group_rss_sum_kib": 6815152,
+    "mean_group_cpu_percent": 100.1695309375902,
+    "max_group_cpu_percent": 103.06470216707999,
+    "mean_gpu0_device_util_percent": 6.888888888888889,
+    "max_gpu0_device_memory_mib": 1554.0,
+    "process_commands": {
+      "44603": "/home/ueda/PycharmProjects/rnaModScan/.venv_cuda112/bin/python -u -m prediction.launcher --config /home/ueda/PycharmProjects/rnaModScan/prediction/config_hela_wt_v2.yaml",
+      "51934": "/home/ueda/PycharmProjects/rnaModScan/.venv_cuda112/bin/python -c from multiprocessing.resource_tracker import main;main(8)",
+      "82026": "/home/ueda/PycharmProjects/rnaModScan/.venv_cuda112/bin/python -B -m prediction --config /home/ueda/PycharmProjects/rnaModScan/prediction/config_hela_wt_v2.yaml --genome hg38 --device gpu --cpu-threads 4 --stage infer"
+    }
+  },
+  "host": {
+    "name": "g001",
+    "cpu_model": "AMD EPYC 7552",
+    "physical_cpu_sockets": 2,
+    "online_logical_cpus": 96,
+    "visible_memory_kib": 527948156,
+    "gpu_model": "A100-PCIE-40GB",
+    "gpu_count": 2,
+    "input_output_storage": "NFSv4; genome FASTA local XFS"
+  },
+  "limitations": [
+    "Original GPU run concurrent with m6Anet and shared storage; not isolated speed benchmark.",
+    "30-second sampled RSS is a lower bound and group RSS can double-count shared pages.",
+    "GPU utilization is device-wide; measurements do not isolate NN kernel timing.",
+    "End-to-end CPU estimate may reuse old non-inference times only if explicitly called an estimate, not a measured full rerun.",
+    "CPU benchmark should use same model/prepared inputs/batch size and explicitly record threads/environment."
+  ]
+}

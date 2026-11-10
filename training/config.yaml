@@ -1,0 +1,100 @@
+schema_version: 1
+mode: train
+# Relative paths are resolved from this YAML file.
+output_dir: ../results/training_v10
+targets: [m6A, inosine]
+
+# Reuse the complete labeled lists; do not rescan the large bedMethyl inputs.
+# For a fresh analysis, source_dir: null builds lists under output_dir/sites.
+selection:
+  enabled: true
+  source_dir: ../results/training_v3/sites
+  seed: 42
+
+references:
+  # GRCh38 FASTA + FAI, and a versioned GENCODE GTF.
+  # Softmasked genome: lowercase acgt=repeat; uppercase ACGT=nonrepeat.
+  fasta: /share/reference/hg38.fa
+  # This compatibility key accepts GENCODE GTF or GFF3.
+  gtf: /mnt/ssdnas07/pipeline/rna_modscore_v2/source/gencode.v44.annotation.gff3
+  catalog: ../data/references/catalog.json
+
+samples:
+  - sample_id: HEK293T_WT
+    cell: HEK293T
+    reference_cell: HEK293T
+    condition: WT
+    bedmethyl: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HEK293T_WT_pass_only_modkit/all_modifications.bed
+    pileup_log: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HEK293T_WT_pass_only_modkit/pileup.log
+    bam: /mnt/ssdnas/dorado/riboML/rna004_130bps_sup@v6.0.0/HEK293T/PAU05273_pass_fd81c83d/bam_pass/PAU05273_pass_fd81c83d.sorted.bam
+    enabled: true
+  - sample_id: HEK293T_IVT
+    cell: HEK293T
+    reference_cell: HEK293T
+    condition: IVT
+    bedmethyl: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HEK293T_IVT_modkit/all_modifications.bed
+    pileup_log: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HEK293T_IVT_modkit/pileup.log
+    bam: /mnt/ssdnas/dorado/riboML/rna004_130bps_sup@v6.0.0/HEK293T_IVT/PAW01579_75c9b793_949d4b52/bam/PAW01579_75c9b793_949d4b52.sorted.bam
+    enabled: true
+  - sample_id: HeLa_WT
+    cell: HeLa
+    reference_cell: HeLa
+    condition: WT
+    bedmethyl: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HeLa_WT_pass_only_modkit/all_modifications.bed
+    pileup_log: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HeLa_WT_pass_only_modkit/pileup.log
+    bam: /mnt/ssdnas/dorado/riboML/rna004_130bps_sup@v6.0.0/HeLa/PAU09364_pass_c7fa45d4/bam_pass/PAU09364_pass_c7fa45d4.sorted.bam
+    enabled: true
+  - sample_id: HeLa_IVT
+    cell: HeLa
+    reference_cell: HeLa
+    condition: IVT
+    bedmethyl: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HeLa_IVT_modkit/all_modifications.bed
+    pileup_log: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HeLa_IVT_modkit/pileup.log
+    bam: /mnt/ssdnas/dorado/riboML/rna004_130bps_sup@v6.0.0/HeLa_IVT/PBA02676_8dadec17_a898d714/bam/PBA02676_8dadec17_a898d714.sorted.bam
+    enabled: true
+
+features:
+  flank: 9
+  min_mapq: 0
+  sample_workers: 4  # One process per BAM; each process exits after its BAM.
+  bam_threads: 2
+  progress_seconds: 60
+  candidate_group_gap: 10000
+  group_batch_size: 16
+  max_fetch_span: 10000000
+  read_batch_size: 256
+candidates:
+  min_depth: 10
+  min_modified: 3
+  min_af: 0.1
+  ivt_min_modified: 3
+  ivt_af_ratio: 0.6
+cv:
+  seed: 42
+  validation_fraction: 0.1
+  require_all_samples: true
+# Additional manifests; the existing five-fold split above is unchanged.
+# HeLa is reserved for a separate analysis, not a test during training.
+cell_dataset:
+  training_cell: HEK293T
+  separate_cell: HeLa
+  validation_fraction: 0.1
+  seed: 42
+nn:
+  task: adenine_three_class
+  batch_sites: 16
+  max_reads: 300
+  sampling_seed: 42
+  epochs: 20
+  patience: 3
+  learning_rate: 0.001
+  folds: [0, 1, 2, 3, 4]
+  target_settings:
+    adenine: {threshold: 0.5, final_epochs: null}  # Softmax uses argmax; threshold is unused.
+
+# Optional inspection only; these values do not change existing bedMethyl calls.
+quality:
+  percentile: 0.1
+  sample_fraction: 1.0
+  seed: 42
+  only_aligned: true

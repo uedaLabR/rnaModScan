@@ -1,0 +1,35 @@
+{
+  "schema": "frozen_feature_reliance_protocol_v1",
+  "date": "2026-11-09",
+  "task": "Measure the existing NN's dependence on reference sequence, repeat, neighboring modification scores and quality",
+  "initial_model": "results/training_v10/trials/lr_0p0003_5fold/adenine/fold_0/train/best.keras",
+  "initial_evaluation": "Complete fold0 test split, 109747 observations; the corresponding checkpoint was selected by the original training validation loss",
+  "model_policy": "Frozen weights, no training or threshold optimization; original inputs and outputs remain unchanged",
+  "primary_conditions": ["sequence", "repeat", "neighbor_ml", "quality"],
+  "diagnostic_controls": ["sequence_repeat", "center_ml", "all_ml"],
+  "randomization_seeds": [17, 43, 101],
+  "reference_replacement": "Whole overlapping-trimer sequence window or whole repeat mask exchanged between sites within retained-read-count bins; joint condition uses the same donor for both inputs",
+  "read_replacement": "Stratified empirical donor replacement; joint eight-channel ML vectors sampled by observed base, relative position and retained-read-count bin. Not an unrestricted whole-bag permutation",
+  "quality_replacement": "Replace positive observed inverse-quality values within the same strata; preserve zeros, absent bases and padded reads",
+  "depth_bins": ["1-29", "30-99", "100-299", "300"],
+  "pool_capacity_per_stratum": 4096,
+  "pool_seed": 42,
+  "neighbor_definition": "Positions -9..-1 and +1..+9; center ML is retained in neighbor_ml",
+  "quality_positions": "All 19 positions",
+  "primary_measure": "Baseline F1 minus perturbed F1 in percentage points; report macro-F1, m6A DRACH, m6A non-DRACH and all inosine",
+  "additional_measures": ["accuracy", "class precision", "class recall", "unweighted log loss", "class-change fraction", "probability changes"],
+  "context_metrics": "For each motif stratum retain all three true classes when calculating one-vs-rest m6A F1",
+  "repeat_sd": "Variation across three donor randomizations for the same frozen model; not fold SD or a confidence interval",
+  "limitations": [
+    "Results quantify dependence under these specified perturbations, not causal biochemical effects or intrinsic feature utility",
+    "Reference-branch perturbation leaves reference-related MATCH/mismatch information in the read branch",
+    "Read resampling preserves within-position ML channel relationships and applicability, but disrupts within-read and within-site score correlations",
+    "Correlated inputs and interactions make the four effects non-additive; do not normalize them to sum to 100 percent",
+    "Operational weak labels are not independent chemical ground truth",
+    "Testing a removed-input model after retraining is a different experiment and is not performed here"
+  ],
+  "methodological_sources": [
+    "https://jmlr.org/papers/v20/18-760.html",
+    "https://scikit-learn.org/stable/modules/permutation_importance.html"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "status": "PASS",
+  "auditor": "audit_importance_design independent read-only audit",
+  "pilots": [
+    {
+      "directory": "results/feature_reliance_pilot_fold0_20261109",
+      "status": "PASS",
+      "sites": 512,
+      "class_counts": {
+        "2": 350,
+        "0": 158,
+        "1": 4
+      },
+      "model_sha256": "d593b36fed04f2fcf0f9eb8a964a55c786b9cf93f8d9e751d074835ccbd6bda0",
+      "feature_set": "sequence_reads_repeat18_v1",
+      "score_shape": [
+        22,
+        512,
+        3
+      ],
+      "all22_metric_arrays_independently_recomputed": true,
+      "source_batch_sites": 64,
+      "model_batch_cap": 512,
+      "anchor_probability_drift": 0,
+      "anchor_class_changes": 0,
+      "baseline_copy_exact": true,
+      "donor_strata": 608,
+      "seen_cells": {
+        "ml": 770649,
+        "quality": 770649
+      },
+      "kept_donors": {
+        "ml": 702377,
+        "quality": 702377
+      },
+      "off_canonical_ml_donor_nonzeros": 0,
+      "all_eligible_replacement_coverage": 1.0,
+      "saved_baseline_class_changes": 0,
+      "pilot_only": "Only4Inosineobservations; pipeline/identity check, not publishedfeatureimportance evidence"
+    },
+    {
+      "directory": "results/feature_reliance_pilot128_fold0_20261109",
+      "status": "PASS",
+      "sites": 512,
+      "class_counts": {
+        "2": 350,
+        "0": 158,
+        "1": 4
+      },
+      "model_sha256": "d593b36fed04f2fcf0f9eb8a964a55c786b9cf93f8d9e751d074835ccbd6bda0",
+      "feature_set": "sequence_reads_repeat18_v1",
+      "score_shape": [
+        22,
+        512,
+        3
+      ],
+      "all22_metric_arrays_independently_recomputed": true,
+      "source_batch_sites": 128,
+      "model_batch_cap": 1024,
+      "anchor_probability_drift": 0,
+      "anchor_class_changes": 0,
+      "baseline_copy_exact": true,
+      "donor_strata": 608,
+      "seen_cells": {
+        "ml": 770649,
+        "quality": 770649
+      },
+      "kept_donors": {
+        "ml": 702377,
+        "quality": 702377
+      },
+      "off_canonical_ml_donor_nonzeros": 0,
+      "all_eligible_replacement_coverage": 1.0,
+      "saved_baseline_class_changes": 0,
+      "pilot_only": "Only4Inosineobservations; pipeline/identity check, not publishedfeatureimportance evidence"
+    }
+  ],
+  "source_files_current_hashes_verified": 20,
+  "label_blind_selection_independently_reproduced": true,
+  "index_order_and_row_metadata_verified": true,
+  "pilot_cohorts_and_donor_pool_arrays_identical": true,
+  "real_read_site_observations": 41280,
+  "no_tensorflow_or_gpu_calls": true,
+  "no_inference_or_training_launched": true,
+  "scope": "Saved pilot artifacts/arrays/recordedidentityguards; no rerun or biologicalimportance claim"
+}

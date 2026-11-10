@@ -1,0 +1,4 @@
+-r requirements-bam.txt
+tensorflow>=2.16,<2.20
+matplotlib>=3.7
+PyYAML>=6

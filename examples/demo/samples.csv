@@ -1,0 +1,4 @@
+sample_id,condition,cell_line,cohort,role,chemistry,genome,bam,reference_fasta,dorado_version,canonical_model,modification_models,canonical_ivt
+demo_wt,WT,HEK293T,demo_development,development,RNA004,GRCh38,missing/demo_wt.bam,missing/GRCh38.fa,DEMO,DEMO,DEMO,false
+demo_ivt,IVT,HEK293T,demo_development,development,RNA004,GRCh38,missing/demo_ivt.bam,missing/GRCh38.fa,DEMO,DEMO,DEMO,true
+demo_external,WT,HeLa,demo_external,external,RNA004,GRCh38,missing/demo_external.bam,missing/GRCh38.fa,DEMO,DEMO,DEMO,false

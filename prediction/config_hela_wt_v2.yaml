@@ -1,0 +1,66 @@
+# Fresh lossless-integer Parquet v4; four independent CPU group workers.
+schema_version: 1
+mode: predict
+genome: hg38
+output_dir: ../results/prediction_HeLa_WT_HEKonly_v2
+targets:
+- m6A
+- m5C
+- inosine
+- pseU
+modkit:
+  run_pileup: false
+  executable: modkit
+  threads: 4
+  filter_threshold: null
+  mod_thresholds: null
+  include_bed: null
+  seed: null
+filtering:
+  reference_only_targets:
+  - m5C
+  - pseU
+  m6a_drach_keep: true
+references:
+  fasta: /share/reference/hg38.fa
+  gtf: /mnt/ssdnas07/pipeline/rna_modscore_v2/source/gencode.v44.annotation.gff3
+  catalog: null
+sample:
+  sample_id: HeLa_WT
+  cell: HeLa
+  reference_cell: HeLa
+  condition: WT
+  bedmethyl: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HeLa_WT_pass_only_modkit/all_modifications.bed
+  pileup_log: /home/ueda/RNA004/modScore/result/rna004_130bps_sup_v6.0.0/HeLa_WT_pass_only_modkit/pileup.log
+  bam: /mnt/ssdnas/dorado/riboML/rna004_130bps_sup@v6.0.0/HeLa/PAU09364_pass_c7fa45d4/bam_pass/PAU09364_pass_c7fa45d4.sorted.bam
+  enabled: true
+model_root: null
+model_directories:
+  adenine: ../results/training_v10/cell_models/HEK293T/adenine/final_model
+recalibrate_bam: false
+bam_threads: 2
+features:
+  flank: 9
+  min_mapq: 0
+  bam_threads: 1
+  progress_seconds: 60
+  candidate_group_gap: 10000
+  read_batch_size: 256
+  sample_workers: 1
+  group_workers: 4
+  group_batch_size: 16
+  max_fetch_span: 10000000
+candidates:
+  min_depth: 10
+  min_modified: 3
+  min_af: 0.1
+nn:
+  task: adenine_three_class
+  batch_sites: 16
+  device: gpu
+  cpu_threads: 4
+quality:
+  percentile: 0.1
+  sample_fraction: 1.0
+  seed: 42
+  only_aligned: true

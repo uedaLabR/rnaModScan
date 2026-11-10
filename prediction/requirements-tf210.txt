@@ -1,0 +1,15 @@
+# Current HEK293T bundle: Python 3.10, Linux x86_64.
+# Exact versions present in the working TF2.10.1 environment.
+# CPU inference is supported with --device cpu in this same environment.
+# GPU additionally requires a compatible driver/CUDA/cuDNN stack.
+# Do not combine with the modern [prediction-cpu] or [training] extras.
+# A fresh installation/container build has not yet been validated.
+tensorflow==2.10.1
+keras==2.10.0
+tensorflow-estimator==2.10.0
+numpy==1.23.5
+protobuf==3.19.6
+h5py==3.16.0
+pyarrow==19.0.1
+pysam==0.24.1
+PyYAML==6.0.3

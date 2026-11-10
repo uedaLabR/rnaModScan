@@ -1,0 +1,61 @@
+{
+  "assembly": "mm10",
+  "sources": [
+    {
+      "id": "RMBase3.mm10.m6A",
+      "kind": "database",
+      "database": "RMBase",
+      "version": "3.0",
+      "cell": "*",
+      "modification": "m6A",
+      "assembly": "mm10",
+      "original_assembly": "mm10",
+      "coordinates": "BED0",
+      "path": "../reference_sites_mm10/rmbase3/m6A.mm10.bed",
+      "sha256": "818456240ce981dba3fc1c1193b5aa81d1c57d89077ef239f73f24e7616dbc8b",
+      "provenance": "../reference_sites_mm10/rmbase3/import.json"
+    },
+    {
+      "id": "RMBase3.mm10.m5C",
+      "kind": "database",
+      "database": "RMBase",
+      "version": "3.0",
+      "cell": "*",
+      "modification": "m5C",
+      "assembly": "mm10",
+      "original_assembly": "mm10",
+      "coordinates": "BED0",
+      "path": "../reference_sites_mm10/rmbase3/m5C.mm10.bed",
+      "sha256": "cb7e33c49fabb80cf034b72fc06c98ef4a1332fc8901a3bb6d37c2ca01289902",
+      "provenance": "../reference_sites_mm10/rmbase3/import.json"
+    },
+    {
+      "id": "RMBase3.mm10.inosine",
+      "kind": "database",
+      "database": "RMBase",
+      "version": "3.0",
+      "cell": "*",
+      "modification": "inosine",
+      "assembly": "mm10",
+      "original_assembly": "mm10",
+      "coordinates": "BED0",
+      "path": "../reference_sites_mm10/rmbase3/inosine.mm10.bed",
+      "sha256": "4d5ca7ad1fcedd41e1edf52a48e99607e75ff01746c468cf0af589b2658c10d3",
+      "provenance": "../reference_sites_mm10/rmbase3/import.json"
+    },
+    {
+      "id": "RMBase3.mm10.pseU",
+      "kind": "database",
+      "database": "RMBase",
+      "version": "3.0",
+      "cell": "*",
+      "modification": "pseU",
+      "assembly": "mm10",
+      "original_assembly": "mm10",
+      "coordinates": "BED0",
+      "path": "../reference_sites_mm10/rmbase3/pseU.mm10.bed",
+      "sha256": "fc84945b776e7bd655445f98975acb40fef4b8493521bc85d18d14a111b1b4b5",
+      "provenance": "../reference_sites_mm10/rmbase3/import.json"
+    }
+  ]
+}

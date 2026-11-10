@@ -1,0 +1,10 @@
+# Separate legacy GPU environment for CUDA 11.2 / cuDNN 8.1 and Python 3.10.
+# Do not install together with requirements-nn.txt (which selects newer TF).
+tensorflow==2.10.1
+keras==2.10.0
+numpy==1.23.5
+protobuf>=3.9.2,<3.20
+pyarrow>=14,<20
+pysam>=0.22,<0.25
+matplotlib>=3.7,<3.9
+PyYAML>=6,<7

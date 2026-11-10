@@ -1,0 +1,76 @@
+schema_version: 1
+mode: predict
+# hg38: DB + matching-cell short-read; mm10: RMBase 3.0 only; other: neither.
+genome: hg38
+# Use a separate output directory for each analysis sample.
+output_dir: ../results/prediction_v8
+# CPU preparation saves nn_inputs/{target}/chrom=<name>/strand=plus|minus/.
+# --stage infer reads only these tensors and the model, and writes scores/.
+# --stage filter joins saved sites/scores on CPU; no raw BAM/GTF is reopened
+# unless the optional recalibrated BAM is requested.
+targets: [m6A, m5C, inosine, pseU]
+
+# false: reuse sample.bedmethyl/pileup_log; true: run modkit from sample.bam.
+modkit:
+  run_pileup: false
+  executable: modkit
+  threads: 4
+  filter_threshold: null  # ML confidence; null retains modkit's automatic estimation.
+  mod_thresholds: null
+  include_bed: null
+  seed: null
+
+filtering:
+  reference_only_targets: [m5C, pseU]
+  # Score both groups; return DRACH candidates regardless of the NN decision.
+  m6a_drach_keep: true
+
+references:
+  # Genome for read features/motifs; optional GENCODE GTF annotates output only.
+  # Softmasked genome: lowercase acgt=repeat; uppercase ACGT=nonrepeat.
+  fasta: /share/reference/hg38.fa
+  gtf: null
+  catalog: null  # Automatic hg38/mm10 catalog; ignored for other. Optional matching-assembly override.
+
+sample:
+  sample_id: analysis_sample
+  cell: HEK293T
+  reference_cell: HEK293T
+  condition: WT
+  bedmethyl: null
+  pileup_log: null
+  bam: null
+  enabled: true
+
+# A directory containing one final model bundle per target.
+model_root: ../results/training_v10/final_model
+model_directories: {}
+
+# --recalibrate / --no-recalibrate override this option.
+# Recalibration writes a new BAM with rejected target ML bytes set to zero.
+recalibrate_bam: false
+bam_threads: 2
+
+features:
+  flank: 9
+  min_mapq: 0
+  candidate_group_gap: 10000  # Split when consecutive centers are >=10 kb apart.
+  group_batch_size: 16       # Merge consecutive groups across both strands into one fetch.
+  max_fetch_span: 10000000   # Hard limit per fetch, including any gaps (10 Mb).
+  read_batch_size: 256       # BAM read buffer; per-site NN reservoir is capped at 300.
+candidates:
+  min_depth: 10
+  min_modified: 3
+  min_af: 0.1
+nn:
+  task: adenine_three_class
+  batch_sites: 4
+  device: auto              # auto: GPU if available, otherwise CPU; cpu: disable GPU; gpu: require GPU.
+  cpu_threads: null         # TensorFlow chooses threads; optionally set a positive integer (e.g. 4).
+
+# Optional score-distribution inspection, separate from site prediction.
+quality:
+  percentile: 0.1
+  sample_fraction: 1.0
+  seed: 42
+  only_aligned: true

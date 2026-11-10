@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "audit_scope": "Independent metadata, resources, complete193Parquet/row/probability/argmax and paper-report audit; no inference rerun",
+  "measured_CPU_seconds": 1576.57,
+  "historical_GPU_seconds": 1363.598102,
+  "CPU_over_historical_GPU_ratio": 1.1561837741543,
+  "estimated_CPU_full_workflow_seconds": 9924.141819999999,
+  "CPU_full_workflow_measured": false,
+  "measured_resources": {
+    "wall_seconds": "1576.57",
+    "user_seconds": "2386.98",
+    "system_seconds": "68.19",
+    "max_rss_kib": "676828",
+    "exit_status": "0",
+    "cpu_percent": "155%"
+  },
+  "runtime": {
+    "requested_device": "cpu",
+    "device": "cpu",
+    "cpu_threads": 4,
+    "gpu_devices": [],
+    "tensorflow_version": "2.10.1"
+  },
+  "rows": 507501,
+  "partitions": 193,
+  "row_ids_and_order_identical": true,
+  "probability_scores_finite_normalized_valid": true,
+  "argmax_matches_stored_class": true,
+  "class_disagreements": 29,
+  "argmax_agreement": 0.9999428572554537,
+  "max_absolute_probability_difference": 0.004668891429901123,
+  "mean_absolute_probability_difference": 2.7809870302280103e-05,
+  "raw_joint_class_counts": {
+    "cpu": {
+      "m6A": 106575,
+      "false_positive": 392189,
+      "inosine": 8737
+    },
+    "gpu": {
+      "m6A": 106594,
+      "false_positive": 392170,
+      "inosine": 8737
+    }
+  },
+  "changed_class_transitions": {
+    "m6A->false_positive": 21,
+    "false_positive->m6A": 2,
+    "inosine->false_positive": 3,
+    "false_positive->inosine": 3
+  },
+  "changed_max_top_two_margin_CPU": 0.001999199390411377,
+  "changed_max_top_two_margin_GPU": 0.003839939832687378,
+  "class_count_scope": "Raw merged adenine-model argmax observations; NOT modification-specific returned candidates and NOT final-rescue counts",
+  "source_input_manifest_and_model_SHA_unchanged": true,
+  "core_code_matches_original_GPU": {
+    "prediction/scoring.py": true,
+    "prediction/runtime.py": true,
+    "utils/nn/keras_site.py": true,
+    "utils/features/site_tensors.py": true,
+    "utils/features/compact_inputs.py": true
+  },
+  "paper_report_source_and_workbook_SHA_verified": true,
+  "three_workbook_sheets_read_back": true,
+  "actual_historical_estimated_labels_correct": true,
+  "limitations": [
+    "CPU/GPU were separate dates on same host; historicalGPU was concurrent withotherwork; noisolatedconcurrentbenchmark.",
+    "Backendprobabilitydifferencesobserved; nospecificcause suchasTF32 proven.",
+    "CPU4 isTF intra4/inter1, notwhole-process affinity/corecap.",
+    "EntireCPUworkflowtime isestimateusingoldnon-inference timings, notnewBAMrun."
+  ],
+  "sources": [
+    "/home/ueda/PycharmProjects/rnaModScan/results/benchmark_HeLa_CPU_20261109/run.json",
+    "/home/ueda/PycharmProjects/rnaModScan/results/benchmark_HeLa_CPU_20261109/resources.txt",
+    "/home/ueda/PycharmProjects/rnaModScan/results/benchmark_HeLa_CPU_20261109/scores/adenine/run.json",
+    "/home/ueda/PycharmProjects/rnaModScan/results/prediction_HeLa_WT_HEKonly_v2/execution.log",
+    "/home/ueda/PycharmProjects/rnaModScan/paper/data/cpu_benchmark_20261109/run.json"
+  ]
+}

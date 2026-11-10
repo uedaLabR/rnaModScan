@@ -1,0 +1,4 @@
+split_group,split
+demo_gene_A,train
+demo_gene_B,validation
+demo_gene_C,test

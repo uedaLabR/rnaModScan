@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "scope": "Summary from completed source metrics, native Excel/TSV, effect signs and plot inspection; raw NPY classification recalculation audited separately",
+  "source_run_sha256": "02593486e911d24dd08c5e28054c37da34163d5d2551381a36f2b80b49b58bfd",
+  "fold": 0,
+  "sites": 109747,
+  "seed_repetitions": 3,
+  "evaluations": 22,
+  "source_metrics_cells_checked": 2112,
+  "effect_rows_checked": 182,
+  "effect_value_recomputations": 910,
+  "all_typed_Excel_metrics_and_effect_cells_match": true,
+  "compact_primary_rows_checked": 4,
+  "original_all_condition_plots_unchanged": {
+    "Feature_reliance_F1.svg": "ee538dc59810a5a76e4909686b5e5879cfdd19ee6c0bb44bd9a9f26ac3c60f3f",
+    "Feature_reliance_F1.pdf": "35cecdb2a4a9a5395409f3d934746f6dcd79c6b0566ba992bf043b63ea5a41e5",
+    "Feature_reliance_F1.png": "8219ae9681d4900264dcaeca654c3595cce41b1f3c542b568c57c0328256a011"
+  },
+  "workbook_sha256": "5c2287fee7e0d50735289e30d7b0a697b2669fc340c638bc457358c892aef08b",
+  "primary_figures_added": true,
+  "plot_review": "Original all7 view shows strong centre-ML controls. Primary-only panels have independent, labelled x scales and mean\u00b1SD labels. Negative quality effects retained, labels placed clear of feature names. Both PNGs visually inspected.",
+  "uncertainty": "Sample SD across donor randomizations for one frozen fold0 checkpoint; not fold SD/CI",
+  "interpretation": "Conditional frozen-model reliance on operational weak labels; no additive percentage attribution, chemical causal importance or retraining ablation claim",
+  "training_or_inference_performed_by_summary_auditor": false
+}

@@ -1,0 +1,6 @@
+assembly: GRCh38
+flank: 5
+membership: ../../paper/data/hela_m6a_comparison_20261108/membership_non_DRACH__NN__full_catalog.tsv
+fasta: /share/reference/hg38.fa
+output: ../../paper/data/hela_non_drach_motifs_20261108
+figures: ../../paper/figures/hela_non_drach_motifs_20261108

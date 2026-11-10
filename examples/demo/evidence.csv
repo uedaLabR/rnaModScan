@@ -1,0 +1,11 @@
+sample_id,chrom,pos0,strand,modification,split_group,long_depth,short_depth,short_callable,truth_kind,truth_method,truth_source,truth_match,truth_qc_pass,short_fraction,truth_positive,known_db,dorado_candidate
+demo_wt,chr1,100,+,m6A,demo_gene_A,30,40,true,quantitative,GLORI,synthetic,same_rna,true,0.30,false,,true
+demo_ivt,chr1,100,+,m6A,demo_gene_A,30,,false,none,,,none,false,,false,,true
+demo_wt,chr1,200,+,m6A,demo_gene_B,20,30,true,quantitative,GLORI,synthetic,same_rna,true,0.00,false,,true
+demo_wt,chr1,300,-,m6A,demo_gene_C,50,50,true,quantitative,GLORI,synthetic,same_cell_line,true,0.20,false,DEMO_DB,true
+demo_wt,chr1,400,+,m6A,demo_gene_C,50,,false,none,,,none,false,,false,DEMO_DB,true
+demo_wt,chr1,500,+,inosine,demo_gene_A,40,50,true,positive_only,Slic-seq,synthetic,same_cell_line,true,,true,,true
+demo_wt,chr1,600,+,inosine,demo_gene_B,40,50,true,positive_only,Slic-seq,synthetic,same_cell_line,true,,false,,true
+demo_ivt,chr1,500,+,inosine,demo_gene_A,40,,false,none,,,none,false,,false,,true
+demo_external,chr1,100,+,m6A,demo_gene_A,40,40,true,quantitative,GLORI,synthetic,same_rna,true,0.20,false,,true
+demo_external,chr1,300,-,m6A,demo_gene_C,80,50,true,quantitative,GLORI,synthetic,same_rna,true,0.00,false,,false
