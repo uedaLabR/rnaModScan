@@ -1,0 +1,69 @@
+{
+  "database": "RMBase",
+  "version": "3.0",
+  "species": "Homo sapiens",
+  "assembly": "GRCh38",
+  "coordinates": "BED0",
+  "original_assembly": "hg38",
+  "conversion": "none (hg38 = GRCh38)",
+  "source_url": "https://rna.sysu.edu.cn/rmbase3/download.php",
+  "files": [
+    {
+      "modification": "m6A",
+      "archive": "C:\\project\\rnaMosScan\\source\\hg38.m6A.tar.gz",
+      "archive_sha256": "a6059b794dab2c57315019da34130b70b19ef3b269f0ac2d0e8834f7257d9211",
+      "member": "human.hg38.m6A.result.col29.bed",
+      "accepted_type": "m6A",
+      "observed_types": {
+        "m6A": 882385
+      },
+      "unique_sites": 882385,
+      "duplicate_rows": 0,
+      "bed": "m6A.GRCh38.bed",
+      "bed_sha256": "290cc91059fb120b3117c0587e24ef2df09c2aa56309170d3cc91e149fdd9922"
+    },
+    {
+      "modification": "m5C",
+      "archive": "C:\\project\\rnaMosScan\\source\\hg38.m5C.tar.gz",
+      "archive_sha256": "ad0a164c808e9f65270bac0bb8b47e3bc230d1d3d20972b0ce8f0082cdd0255a",
+      "member": "human.hg38.m5C.result.col29.bed",
+      "accepted_type": "m5C",
+      "observed_types": {
+        "m5C": 46025
+      },
+      "unique_sites": 46025,
+      "duplicate_rows": 0,
+      "bed": "m5C.GRCh38.bed",
+      "bed_sha256": "52dc1dde5d4bc543f69d14fd0cff67e0b826533347b62425ab38fa6e6dd35fd6"
+    },
+    {
+      "modification": "inosine",
+      "archive": "C:\\project\\rnaMosScan\\source\\hg38.RNA-editing.tar.gz",
+      "archive_sha256": "88e76449dcc76a1b62a6e579303e2417bfa065c56b520c4cd054f271313dbfb8",
+      "member": "human.hg38.RNA-editing.result.col29.bed",
+      "accepted_type": "A-I",
+      "observed_types": {
+        "A-I": 144122
+      },
+      "unique_sites": 144122,
+      "duplicate_rows": 0,
+      "bed": "inosine.GRCh38.bed",
+      "bed_sha256": "ea44269fa702eab4561bb4f1d7488e8925ac27a73b928c3aa37ea8596f047d31"
+    },
+    {
+      "modification": "pseU",
+      "archive": "C:\\project\\rnaMosScan\\source\\hg38.Pseudo.tar.gz",
+      "archive_sha256": "0392b7a2d73e102e7643119eb5d096e276fe890cfdbbe2b1ea6539009c72fbce",
+      "member": "human.hg38.Pseudo.result.col29.bed",
+      "accepted_type": "Y",
+      "observed_types": {
+        "Y": 5705
+      },
+      "unique_sites": 5705,
+      "duplicate_rows": 0,
+      "bed": "pseU.GRCh38.bed",
+      "bed_sha256": "27fc4975c90465faeae38e459d690dc09aa399efc642fc744ef33db419dfc721"
+    }
+  ],
+  "cell_scope": "all human biosamples; not a HeLa or HEK293-specific truth set"
+}

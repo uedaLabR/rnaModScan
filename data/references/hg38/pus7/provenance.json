@@ -1,0 +1,45 @@
+{
+  "paper_url": "https://www.cell.com/cell-genomics/fulltext/S2666-979X(26)00194-1",
+  "source_file": "mmc2.xlsx",
+  "source_sha256": "f246a7f02b76342cc3d361b476ef8ccef99284dc5374a034095237330c81a0f5",
+  "cell": "HepG2",
+  "modification": "pseU",
+  "role": "positive_evidence",
+  "assembly": "GRCh38",
+  "coordinates": "BED0",
+  "coordinate_evidence": "All source motifs match strand-oriented hg38 at pos-1; pos fails all rows.",
+  "fasta": "/share/reference/hg38.fa",
+  "fasta_index_sha256": "3b425de206296a5c8053023fa5ca61da43cfe78c1737c12e58c83367c7e83c21",
+  "catalog_sha256": "1eb11774e180de184519a1b724da76d95cfd86095982da6bd931593aa70a9ce1",
+  "counts": {
+    "S1A": 61,
+    "S1B": 43,
+    "union": 84
+  },
+  "shared_sites": 20,
+  "existing_reference_overlap": {
+    "HeLa.pseU.BID-seq": 28,
+    "HeLa.pseU.BACS": 36,
+    "HEK293T.pseU.BID-seq": 24,
+    "HEK293T.pseU.PRAISE": 54,
+    "RMBase3.pseU": 33
+  },
+  "limitations": [
+    "HepG2 evidence is not cell-matched to HEK293T or HeLa.",
+    "S1A is direct RNA mismatch/calibration evidence; S1B uses Dorado.",
+    "PUS7 dependence does not mean every row was independently chemically validated.",
+    "Not an independent holdout unless overlapping training groups and rescue evidence are excluded.",
+    "Non-overlap or absent coverage is not negative evidence.",
+    "Included in training/rescue evidence; cannot serve as an independent test set."
+  ],
+  "bed_sha256": {
+    "S1A": "36b5dbb4ea7fd49e8e241d3e9baaaf168c4300ab0e0df5320a78b3a65648c0bf",
+    "S1B": "815304438281bc95377e1f049198b81a4aab674d5f2601a4632b1c48b93ab09b",
+    "union": "0fe5c45edafd5b9c4e5e3cc679f5f212dae3f6c06e5109daa89b274b21890068"
+  },
+  "applicable_reference_cells": [
+    "HEK293T",
+    "HeLa"
+  ],
+  "application_policy": "Explicit user-requested cross-cell positive evidence, in the existing short_read evidence bucket; actual assay is Nanopore direct RNA, not short-read."
+}

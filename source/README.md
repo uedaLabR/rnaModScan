@@ -32,9 +32,17 @@ counts describe catalog entries, not modification abundance in a sample.
 
 ## Human reference data
 
-All `hg38.*.tar.gz` downloads and imported `references/rmbase3/` data are excluded
-from Git. Their local copies are preserved. Obtain the following files from
-RMBase 3.0 and place them under `source/` when preparing human references:
+Prepared human prediction references are included in
+[`data/references/hg38/`](../data/references/hg38/README.md). The bundle contains
+the RMBase BEDs, configured experimental-map BEDs and three original provenance
+JSON files. BEDs are losslessly gzip-compressed and read directly by the existing
+loader. `genome: hg38` with `references.catalog: null` selects this portable
+catalog. No raw archive is needed for normal prediction after cloning.
+
+All original `hg38.*.tar.gz` downloads and the original local
+`references/rmbase3/` directory remain excluded from Git and preserved locally.
+The compressed runtime copies are stored separately. To regenerate the imports,
+obtain the following files from RMBase 3.0 and place them under `source/`:
 
 | Modification | Archive | Size (MiB) |
 |---|---|---:|
@@ -59,10 +67,11 @@ prepare_rmbase3_catalog(
 
 Set `references.catalog` to that JSON file. This catalog enables RMBase overlap;
 it does not add experimental short-read references. The included
-`data/references/catalog.json` describes the original full human catalog and
-requires all listed experimental files and provenance as well. These are not
-bundled or downloaded automatically. Their assembly, cell, method, source paths
-and checksums must match the catalog. See the
+`data/references/catalog.json` describes the original full local human catalog.
+It is preserved for historical analyses and requires its original paths. New
+human predictions use the portable `data/references/hg38/catalog.json`, which
+points to the included compressed BEDs and provenance JSON. Assemblies, cells,
+methods, coordinates and checksum validation are preserved. See the
 [reference preparation guide](../analysis/reference_catalog/README.md).
 
 Reference files use BED0 genomic coordinates. No automatic liftover or chromosome

@@ -89,8 +89,9 @@ def load_config(path, mode=None, *, genome=None):
         if config['genome'] == 'other':
             references['catalog'] = None  # Never open DB/short-read data for other genomes.
         elif references['catalog'] is None:
-            name = 'catalog.json' if config['genome'] == 'hg38' else 'catalog.mm10.json'
-            references['catalog'] = Path(__file__).resolve().parents[1] / 'data/references' / name
+            root = Path(__file__).resolve().parents[1] / 'data/references'
+            name = 'hg38/catalog.json' if config['genome'] == 'hg38' else 'catalog.mm10.json'
+            references['catalog'] = root / name
     features = config.setdefault('features', {})
     feature_keys = {'flank', 'min_mapq', 'sample_workers', 'bam_threads', 'progress_seconds',
                     'candidate_group_gap', 'read_batch_size', 'group_workers', 'group_batch_size',

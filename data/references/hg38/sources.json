@@ -1,0 +1,162 @@
+[
+  {
+    "modification": "m6A",
+    "cell": "HeLa",
+    "method": "GLORI",
+    "path": "D:\\project\\rnaModScan\\data\\external\\glori\\raw\\GSM6432595_Hela-1_35bp_m2.totalm6A.FDR.csv.gz",
+    "sheet": "",
+    "doi": "10.1038/s41587-022-01487-9",
+    "sha256": "9a07223b9afc411483059824444d07cfd0fa9de0b4d63cada3d9f121a55f675c",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "m6A",
+    "cell": "HeLa",
+    "method": "GLORI",
+    "path": "D:\\project\\rnaModScan\\data\\external\\glori\\raw\\GSM6432596_Hela-2_35bp_m2.totalm6A.FDR.csv.gz",
+    "sheet": "",
+    "doi": "10.1038/s41587-022-01487-9",
+    "sha256": "f477219ea8d09a36718ecda9fc53a68e6831eb94a5fff6effabd8d73cf7e58bc",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "inosine",
+    "cell": "HeLa",
+    "method": "Slic-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\slic_seq\\raw\\GSE169710_Data_S2_A-to-I_sites_identified_by_slic-seq.xlsx",
+    "sheet": "Hela-rep1",
+    "doi": "10.1093/nar/gkad604",
+    "sha256": "0d5b7e8d274a759246cc197ad3b69fff984d198ffd88604aa277cba746443e1e",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "inosine",
+    "cell": "HeLa",
+    "method": "Slic-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\slic_seq\\raw\\GSE169710_Data_S2_A-to-I_sites_identified_by_slic-seq.xlsx",
+    "sheet": "Hela-rep2",
+    "doi": "10.1093/nar/gkad604",
+    "sha256": "0d5b7e8d274a759246cc197ad3b69fff984d198ffd88604aa277cba746443e1e",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "psi",
+    "cell": "HeLa",
+    "method": "BID-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\bid_seq\\raw\\GSE179798_HeLa_mRNA_WT_BID-seq.xlsx",
+    "sheet": "Sheet1",
+    "doi": "10.1038/s41587-022-01505-w",
+    "sha256": "fc5eb85336811b9000d3f758403eb10df7688c311abe6176f3d8264f27175b94",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "m6A",
+    "cell": "HEK293T",
+    "method": "GLORI",
+    "path": "D:\\project\\rnaModScan\\data\\external\\glori\\raw\\GSM6432590_293T-mRNA-1_35bp_m2.totalm6A.FDR.csv.gz",
+    "sheet": "",
+    "doi": "10.1038/s41587-022-01487-9",
+    "sha256": "1fae5354e18b660046ab5c1841fdfaf059e213e1cf2542f597b60d994da85911",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "m6A",
+    "cell": "HEK293T",
+    "method": "GLORI",
+    "path": "D:\\project\\rnaModScan\\data\\external\\glori\\raw\\GSM6432591_293T-mRNA-2_35bp_m2.totalm6A.FDR.csv.gz",
+    "sheet": "",
+    "doi": "10.1038/s41587-022-01487-9",
+    "sha256": "7a9b0dd69d9d6e2db737387f87d18ef3fc8050a7ec575e8c0c566024f4dba638",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "inosine",
+    "cell": "HEK293T",
+    "method": "Slic-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\slic_seq\\raw\\GSE169710_Data_S2_A-to-I_sites_identified_by_slic-seq.xlsx",
+    "sheet": "HEK293T-rep1",
+    "doi": "10.1093/nar/gkad604",
+    "sha256": "0d5b7e8d274a759246cc197ad3b69fff984d198ffd88604aa277cba746443e1e",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "inosine",
+    "cell": "HEK293T",
+    "method": "Slic-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\slic_seq\\raw\\GSE169710_Data_S2_A-to-I_sites_identified_by_slic-seq.xlsx",
+    "sheet": "HEK293T-rep2",
+    "doi": "10.1093/nar/gkad604",
+    "sha256": "0d5b7e8d274a759246cc197ad3b69fff984d198ffd88604aa277cba746443e1e",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "inosine",
+    "cell": "HEK293T",
+    "method": "Slic-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\slic_seq\\raw\\GSE169710_Data_S2_A-to-I_sites_identified_by_slic-seq.xlsx",
+    "sheet": "HEK293T-rep3",
+    "doi": "10.1093/nar/gkad604",
+    "sha256": "0d5b7e8d274a759246cc197ad3b69fff984d198ffd88604aa277cba746443e1e",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "psi",
+    "cell": "HEK293T",
+    "method": "BID-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\bid_seq\\raw\\GSE179798_HEK293T_mRNA_WT_BID-seq.xlsx",
+    "sheet": "Sheet1",
+    "doi": "10.1038/s41587-022-01505-w",
+    "sha256": "47d85533487ce925de014a9ecbda13624925c1204db5b8c453884cf2594de6d1",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "psi",
+    "cell": "HeLa",
+    "method": "BACS",
+    "path": "D:\\project\\rnaModScan\\data\\external\\bacs\\raw\\GSE241849_Supplementary_Table_3_10.xlsx",
+    "sheet": "Supplementary Table 8",
+    "doi": "10.1038/s41592-024-02439-8",
+    "sha256": "eed449b5481c88a16b0e52ee2bd13caa56a190fd05d69458450bf7128ae6786a",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "inosine",
+    "cell": "HeLa",
+    "method": "BACS",
+    "path": "D:\\project\\rnaModScan\\data\\external\\bacs\\raw\\GSE241849_Supplementary_Table_3_10.xlsx",
+    "sheet": "Supplementary Table 10",
+    "doi": "10.1038/s41592-024-02439-8",
+    "sha256": "eed449b5481c88a16b0e52ee2bd13caa56a190fd05d69458450bf7128ae6786a",
+    "coordinate_conversion": "start=position-1; end=position"
+  },
+  {
+    "modification": "psi",
+    "cell": "HEK293T",
+    "method": "PRAISE",
+    "path": "D:\\project\\rnaModScan\\data\\external\\praise\\prepared\\HEK293T_PRAISE_single_sites_GRCh38.bed",
+    "sheet": "",
+    "doi": "10.1038/s41589-023-01304-7",
+    "sha256": "097f05d893153c18c76cdd5abdbb7c82701526e345090e1639ed93b88e057184",
+    "coordinate_conversion": "already BED0"
+  },
+  {
+    "modification": "m5C",
+    "cell": "HEK293T",
+    "method": "m5C-TAC-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\m5c_tac_seq\\liftover_candidates\\hglft_genome_3c0666_9c4540.bed",
+    "sheet": "",
+    "doi": "10.1016/j.molcel.2024.06.021",
+    "sha256": "46a7ec70aa79d14bdd1bbc03f7672ab1b618596a5de9dbe2ba85615c7cfb29ff",
+    "coordinate_conversion": "already BED0"
+  },
+  {
+    "modification": "m5C",
+    "cell": "HeLa",
+    "method": "m5C-TAC-seq",
+    "path": "D:\\project\\rnaModScan\\data\\external\\m5c_tac_seq\\liftover_candidates\\hglft_genome_3cc9a3_9c4730.bed",
+    "sheet": "",
+    "doi": "10.1016/j.molcel.2024.06.021",
+    "sha256": "0c3dbfdc347dea72f0ca7b12949b62ce959a12b90d21e8d2323849ed11aecdf7",
+    "coordinate_conversion": "already BED0"
+  }
+]

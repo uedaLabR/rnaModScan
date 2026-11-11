@@ -1,5 +1,14 @@
 # short-readとRMBaseの参照準備
 
+通常のヒト予測に必要な整形済み参照は、`data/references/hg38/` に同梱しています。
+17個の圧縮BEDと3個の元出典JSONを含み、元BEDのバイト列を損失なくgzip圧縮しています。
+`genome: hg38`、`references.catalog: null` で同梱版カタログを選択します。
+手動展開・元アーカイブの取得・参照再構築は不要です。ゲノムFASTA/FAIは別途必要です。
+`data/references/hg38/README.md` と `SHA256SUMS` を参照してください。
+
+旧 `data/references/catalog.json` と元の整形済みファイルは、過去の解析用に保持しています。
+このフォルダーの再構築スクリプトは、元データから新しい参照を作り直す場合だけ使用します。
+
 集計・確認スクリプトをこのフォルダーへまとめています。データ本体は複製していません。
 
 - `prepare_reference_catalog.py`：既存short-read BEDとRMBase 3.0を登録。RMBase未整形時はsourceのhg38 tar.gzを直接読み、references/rmbase3へ整形。既存整形BEDはハッシュ照合して再利用。

@@ -4,8 +4,9 @@ Install the runtime described in the [main README](../README.md#installation).
 The included pooled HEK293T + HeLa model requires TensorFlow 2.10.1/Keras 2.10.0 on Python 3.10.
 The modern `prediction-cpu` extra is not compatible with that saved model.
 The [deployment bundle](../models/pooled_HEK293T_HeLa_20261111/README.md) contains
-the trained weights and runtime metadata. Reference data and a matching genome
-FASTA/FAI must still be supplied separately.
+the trained weights and runtime metadata. Prepared human reference BEDs and
+provenance JSON are also [included](../data/references/hg38/README.md). Supply a
+matching genome FASTA/FAI and your own sample inputs.
 
 ## Configure an analysis
 
@@ -49,6 +50,11 @@ analysis uses RMBase 3.0 only. `other` disables both reference types and returns
 no m5C/pseudouridine sites. Preparation always requires an assembly-matched
 softmasked FASTA and FAI. There is no automatic liftover or chromosome renaming.
 See [reference preparation](../source/README.md).
+
+For human prediction, leave `references.catalog: null` to select the included
+`data/references/hg38/catalog.json`. Its compressed BEDs are read directly; no
+download of the original RMBase archive or manual decompression is required.
+They preserve the original coordinates, cell scopes and source assignments.
 
 ## Run
 

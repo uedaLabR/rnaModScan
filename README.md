@@ -71,8 +71,9 @@ Check the distributed files from the repository root:
 The model loader also checks the input schema, class order and weight checksum.
 The manuscript's HeLa analysis used separate HEK293T-only weights; those
 performance results are not an independent evaluation of the pooled deployment
-model. Human reference datasets, genome FASTA/FAI and analysis outputs are supplied
-separately as described below.
+model. The prepared human reference BEDs and provenance JSON are also included
+as described below. Supply your own matching genome FASTA/FAI and sample inputs;
+analysis outputs are not distributed with the code.
 
 ## Prediction
 
@@ -163,16 +164,30 @@ and provenance files once after cloning:
 python analysis/reference_catalog/prepare_mouse_reference_catalog.py
 ```
 
-Human archives and imported reference BED/provenance files are excluded from
-Git. The included human catalog records the original data sources, relative
-paths and checksums; it is not a bundle of those datasets. Prepare the files or
-provide an assembly-matched catalog before using `hg38`. See
+Prepared human references are included in
+[`data/references/hg38/`](data/references/hg38/README.md): 17 compressed BEDs,
+three original provenance JSON files, a portable catalog and checksums. They
+cover human RMBase 3.0 and the configured HEK293T/HeLa experimental references.
+The complete runtime data occupy about 12.3 MiB; the largest BED is about 6.8 MiB.
+The existing reader opens `.bed.gz` directly, so no extraction or reference
+rebuilding is needed after cloning. Verify the bundle from the repository root:
+
+```bash
+(cd data/references/hg38 && sha256sum -c SHA256SUMS)
+```
+
+For `genome: hg38`, `references.catalog: null` selects the included
+`data/references/hg38/catalog.json`. A supplied catalog can override it. The
+legacy `data/references/catalog.json` and original imported files are preserved
+for existing local analyses; that legacy catalog is not portable on its own.
+The human bundle is not used for `mm10` or `other`. See
 [reference data](source/README.md) and the
 [reference preparation guide](analysis/reference_catalog/README.md).
 
 In particular, `source/hg38.m6A.tar.gz` is the RMBase source archive used to
 generate the human m6A BED; it is obtained separately when importing references.
-Prediction uses the prepared BED and the catalog's provenance JSON. The large
+It is unnecessary when using the included prepared references. Prediction uses
+the prepared BED and the catalog's provenance JSON. The large
 `references/rmbase3/m6A.provenance.tsv` is a detailed import audit and is not
 required by the prediction runtime. It remains excluded from Git. Neither the
 archive nor the detailed TSV is part of the model weights.
