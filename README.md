@@ -13,7 +13,7 @@ WT samples. The input BAM is preserved; writing a new filtered BAM is optional.
 
 ## Installation
 
-The current HEK293T model was trained and used with **Python 3.10 on Linux
+The included HEK293T + HeLa deployment model was trained with **Python 3.10 on Linux
 x86_64, TensorFlow 2.10.1 and Keras 2.10.0**. Use a separate environment:
 
 ```bash
@@ -56,11 +56,23 @@ Before running prediction, provide:
 - A compatible final-model bundle containing `model.keras` and `run.json`.
 - The reference files listed in the selected catalog, when references are enabled.
 
-**Model weights, human reference datasets and analysis outputs are not included
-in this Git repository. A public pretrained-model download has not yet been
-provided.** The model bundle must be supplied separately or produced by training.
-Renaming a model file does not establish compatibility: the loader checks its
-input schema, class order and checksum.
+The pretrained deployment model is included under
+[`models/pooled_HEK293T_HeLa_20261111/`](models/pooled_HEK293T_HeLa_20261111/README.md).
+It contains the original `adenine/model.keras` weights (about 0.49 MiB),
+`adenine/run.json` and `SHA256SUMS`. It was fitted on all 548,735 labelled
+HEK293T/HeLa WT/IVT observations using the five-epoch schedule selected during
+development. No retraining or separate weight download is required for prediction.
+Check the distributed files from the repository root:
+
+```bash
+(cd models/pooled_HEK293T_HeLa_20261111 && sha256sum -c SHA256SUMS)
+```
+
+The model loader also checks the input schema, class order and weight checksum.
+The manuscript's HeLa analysis used separate HEK293T-only weights; those
+performance results are not an independent evaluation of the pooled deployment
+model. Human reference datasets, genome FASTA/FAI and analysis outputs are supplied
+separately as described below.
 
 ## Prediction
 
@@ -84,6 +96,18 @@ update them after copying. In particular, set:
 | `references.catalog` | Matching reference catalog, or `null` for the genome default |
 | `references.gtf` | Optional GENCODE GTF/GFF3 for output annotation |
 | `model_root` | Directory containing `adenine/model.keras` and `adenine/run.json` |
+
+For the configuration copied to `configs/local/predict.yaml`, point to the
+included deployment model with:
+
+```yaml
+model_root: ../../models/pooled_HEK293T_HeLa_20261111
+model_directories: {}
+```
+
+The original `prediction/config.yaml` already selects this model with a path
+relative to its own directory. Existing local configurations retain their
+explicit model selections.
 
 HEK293 and HEK293T are distinct reference-cell values. Original site AF, call
 counts and provenance are retained. ML confidence thresholds, site AF thresholds
@@ -146,6 +170,13 @@ provide an assembly-matched catalog before using `hg38`. See
 [reference data](source/README.md) and the
 [reference preparation guide](analysis/reference_catalog/README.md).
 
+In particular, `source/hg38.m6A.tar.gz` is the RMBase source archive used to
+generate the human m6A BED; it is obtained separately when importing references.
+Prediction uses the prepared BED and the catalog's provenance JSON. The large
+`references/rmbase3/m6A.provenance.tsv` is a detailed import audit and is not
+required by the prediction runtime. It remains excluded from Git. Neither the
+archive nor the detailed TSV is part of the model weights.
+
 ## Training and development
 
 Training uses paired WT/IVT samples and experimental references to construct weak
@@ -179,7 +210,8 @@ source/       Reference provenance, checksums and mouse source archives
 docs/         Design and workflow documentation
 ```
 
-Virtual environments, credentials, large generated data, models, local manuscript
-files and manuscript-generation scripts are excluded from Git. Source code is
+Virtual environments, credentials, large generated data, training outputs, local
+manuscript files and manuscript-generation scripts are excluded from Git. The
+verified deployment bundle above is the explicitly included model. Source code is
 distributed under the [MIT License](LICENSE); third-party reference datasets
 retain their own terms and attribution.

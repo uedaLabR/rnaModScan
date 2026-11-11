@@ -68,3 +68,16 @@ and checksums must match the catalog. See the
 Reference files use BED0 genomic coordinates. No automatic liftover or chromosome
 renaming is performed. A matching softmasked FASTA with FAI is supplied separately.
 Third-party datasets retain their original terms and attribution.
+
+## Runtime files and import audits
+
+`source/hg38.m6A.tar.gz` is the original human RMBase m6A download (59.65 MiB).
+It is needed to regenerate the imported reference, not to run prediction with an
+already prepared BED. Like the other human source archives, it is obtained from
+the RMBase download page and checked against `source/SHA256SUMS`.
+
+Prediction reads the BEDs named by the selected catalog and the associated
+provenance JSON files, including `references/rmbase3/import.json`. The detailed
+`references/rmbase3/*.provenance.tsv` import audits are not read by the prediction
+runtime and remain excluded from Git. Preserve them locally when retaining the
+complete import record.

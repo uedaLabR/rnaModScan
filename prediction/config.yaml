@@ -42,8 +42,9 @@ sample:
   bam: null
   enabled: true
 
-# A directory containing one final model bundle per target.
-model_root: ../results/training_v10/final_model
+# Included pooled HEK293T + HeLa deployment model (relative to this YAML).
+# Update this path if copying the YAML into another directory.
+model_root: ../models/pooled_HEK293T_HeLa_20261111
 model_directories: {}
 
 # --recalibrate / --no-recalibrate override this option.

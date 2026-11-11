@@ -1,10 +1,11 @@
 # Prediction
 
 Install the runtime described in the [main README](../README.md#installation).
-The existing HEK293T model requires TensorFlow 2.10.1/Keras 2.10.0 on Python 3.10.
+The included pooled HEK293T + HeLa model requires TensorFlow 2.10.1/Keras 2.10.0 on Python 3.10.
 The modern `prediction-cpu` extra is not compatible with that saved model.
-Model weights are supplied separately; this repository contains the code and
-configuration templates.
+The [deployment bundle](../models/pooled_HEK293T_HeLa_20261111/README.md) contains
+the trained weights and runtime metadata. Reference data and a matching genome
+FASTA/FAI must still be supplied separately.
 
 ## Configure an analysis
 
@@ -27,6 +28,16 @@ Use a new `output_dir` and set the following fields:
 | `references.catalog` | Assembly-matched catalog, or `null` for the genome default |
 | `references.gtf` | Optional GENCODE GTF/GFF3 for reporting |
 | `model_root` | Parent directory of `adenine/model.keras` and `adenine/run.json` |
+
+For `configs/local/predict.yaml`, select the included model with:
+
+```yaml
+model_root: ../../models/pooled_HEK293T_HeLa_20261111
+model_directories: {}
+```
+
+The template at `prediction/config.yaml` selects the same bundle relative to its
+own location. Explicit model paths in existing analysis configurations are kept.
 
 With `modkit.run_pileup: false`, existing pileup outputs are read without
 rethresholding. To create them from the BAM, install modkit separately and set

@@ -1,0 +1,166 @@
+{
+  "status": "complete",
+  "role": "final_all_labeled_sites",
+  "target": "adenine",
+  "model": {
+    "target": "adenine",
+    "window": 19,
+    "read_channels": 18,
+    "max_reads": 300,
+    "sampling_seed": 42,
+    "sequence_embedding": 16,
+    "attention_heads": 2,
+    "transformer_ff": 32,
+    "read_hidden_dim": 16,
+    "read_attention_heads": 2,
+    "read_transformer_ff": 32,
+    "read_embedding": 64,
+    "dropout": 0.2
+  },
+  "model_file": "model.keras",
+  "model_sha256": "b14c6836f2d07b49077cc8beab5ff4856bf9ce613f8004c1d2640b488ddea59e",
+  "feature_set": "sequence_reads_repeat18_v1",
+  "threshold": 0.5,
+  "input_schema": {
+    "feature_set": "sequence_reads_repeat18_v1",
+    "missing_ml": "zero",
+    "window": 19,
+    "modification_channels": [
+      "m6A",
+      "inosine",
+      "m5C",
+      "pseU",
+      "2OmeA",
+      "2OmeC",
+      "2OmeG",
+      "2OmeU"
+    ],
+    "read_channel_names": [
+      "ml_m6A",
+      "ml_inosine",
+      "ml_m5C",
+      "ml_pseU",
+      "ml_2OmeA",
+      "ml_2OmeC",
+      "ml_2OmeG",
+      "ml_2OmeU",
+      "inverse_quality",
+      "log1p_insertion",
+      "base_match",
+      "base_A",
+      "base_C",
+      "base_G",
+      "base_T",
+      "base_N",
+      "splice_before_log_distance",
+      "splice_after_log_distance"
+    ],
+    "splice_distance": "same_read_CIGAR_N_query_bases_adjacent_exon_zero",
+    "splice_distance_cap": 1000,
+    "splice_missing_distance": 1000,
+    "splice_distance_transform": "log1p(min(d,1000))/log1p(1000)",
+    "sequence_repeat_mask": "softmasked_FASTA_lowercase_acgt",
+    "repeat_mask_window": 19,
+    "ml_transform": "ML/255",
+    "quality_transform": "1/(Q+1)",
+    "window_mode": "genomic",
+    "orientation": "RNA_5to3",
+    "max_reads": 300,
+    "sampling_seed": 42,
+    "class_names": [
+      "m6A",
+      "inosine",
+      "false_positive"
+    ]
+  },
+  "index_path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/index/adenine/sites.tsv",
+  "index_sha256": "5faf08086c1421fdeebb67f7710b4410a663425f1841310e08a45576f27b797a",
+  "feature_sources": [
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/samples/HEK293T_WT",
+      "run_sha256": "e9a0b6fe6c2947bd13e7596fa07dc320941de5d4078a7cf0e6d26734b4b165c5"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/samples/HEK293T_IVT",
+      "run_sha256": "8fdba8e86788e81fc12f53cc65385d7319c2ccdf7cefbc162e24ab310f530e25"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/samples/HeLa_WT",
+      "run_sha256": "fe5bc4f2f552d88418171a4f568e962822dff8700832f0e1b1ab6d9dd7ae9d6c"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/samples/HeLa_IVT",
+      "run_sha256": "011378358456ea1982cccf0d6a2879be1696daf62eed62ca719808559b2545be"
+    }
+  ],
+  "training_rows": 548735,
+  "epochs": 5,
+  "class_weights": {
+    "2": 0.5269604665612236,
+    "0": 0.9399752644850079,
+    "1": 25.996541595603563
+  },
+  "seed": 42,
+  "learning_rate": 0.0003,
+  "tensorflow_version": "2.10.1",
+  "epoch_policy": "median CV best validation epoch (ceil)",
+  "cv_sources": [
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/trials/lr_0p0003_5fold/adenine/fold_0",
+      "best_epoch": 5,
+      "history_sha256": "3448893deb6151aabf68efe326894c27603e3e106a628976294c7ec2f04dc3c6",
+      "run_sha256": "86a8eeb2e2380306d818650e74681f2b02a5cb5fc75f036d59fa4fa1d8edac41"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/trials/lr_0p0003_5fold/adenine/fold_1",
+      "best_epoch": 11,
+      "history_sha256": "b300c9f66b1ce4747f4b3f4cc0e83b16aa94815f529c8f94847a8e0241ea5b92",
+      "run_sha256": "1e539745ff956de4c8bd0b05fd7aab874e48a0f3f32bf44945909b513359a2ba"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/trials/lr_0p0003_5fold/adenine/fold_2",
+      "best_epoch": 3,
+      "history_sha256": "77c6290c493c909df016809cb978ed4881e81793cdce252fbaf50cae6a52df8d",
+      "run_sha256": "781504a344039315ba6eae00f145ea81f534baf6942a7435a2801fd74477c202"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/trials/lr_0p0003_5fold/adenine/fold_3",
+      "best_epoch": 1,
+      "history_sha256": "fa688a4ae4ee004fb7ee71a625dc36761bdf9256a5d1d9aadd921dfce7a1b11e",
+      "run_sha256": "968f2fa11854570ae40057901541fd848032b095f1ed2043daf9827cbb4d6efb"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/trials/lr_0p0003_5fold/adenine/fold_4",
+      "best_epoch": 9,
+      "history_sha256": "3df54dfcf19674b92805b08d7eeb37325a77a6be57702511b5d482225748b3d8",
+      "run_sha256": "530ec0fd42dfa77184f1195d4f9959ff1cf8553fa12cd6c14b1a64849963b2ed"
+    }
+  ],
+  "evaluation": "no held-out evaluation; use previously saved CV results",
+  "batch_sites": 16,
+  "training_scope": {
+    "cells": [
+      "HEK293T",
+      "HeLa"
+    ],
+    "conditions": [
+      "WT",
+      "IVT"
+    ],
+    "sample_counts": {
+      "HeLa_IVT": 145557,
+      "HEK293T_IVT": 201486,
+      "HEK293T_WT": 124485,
+      "HeLa_WT": 77207
+    },
+    "class_counts": {
+      "false_positive": 347107,
+      "m6A": 194592,
+      "inosine": 7036
+    },
+    "policy": "all labelled index rows, including earlier fold-held-out rows"
+  },
+  "validation_split": null,
+  "early_stopping": false,
+  "source_snapshot_sha256": "63ddf7e1f509d8bb7adc522c3dc90663a8fd94587bdefdf22ff803b2cb804413"
+}
