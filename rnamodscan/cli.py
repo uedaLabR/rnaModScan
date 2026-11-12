@@ -14,8 +14,15 @@ def main(argv=None):
     if arguments and arguments[0] == 'quality':
         from utils.quality.cli import main as quality_main
         return quality_main(arguments[1:])
-    parser = argparse.ArgumentParser(description='rnaModScan: train models, predict sites and inspect modification scores')
-    parser.add_argument('command', choices=('train', 'predict', 'quality'))
+    if arguments and arguments[0] == 'references':
+        from utils.references.cli import main as references_main
+        return references_main(arguments[1:])
+    parser = argparse.ArgumentParser(
+        description='rnaModScan: train models, predict sites and prepare reference catalogs',
+        epilog=('Start a new training run: rnamodscan train init --help. '
+                'Check inputs: rnamodscan train check --help. '
+                'Import positive sites: rnamodscan references build --help.'))
+    parser.add_argument('command', choices=('train', 'predict', 'references', 'quality'))
     parser.parse_args(arguments)
     return 0
 

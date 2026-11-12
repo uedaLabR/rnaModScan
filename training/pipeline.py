@@ -1,4 +1,7 @@
 """Training stages: sites, shared features, annotations, splits and models."""
+import json
+from pathlib import Path
+
 from utils.config import (build_sample_pairs, enabled_samples, index_paths,
                      require_path, training_site_source, joint_adenine, model_targets)
 
@@ -49,6 +52,10 @@ def run_training_stage(config, stage):
             run_training_stage(config, 'select')
             site_root = root / 'selection'
         completed_run(site_root)
+        if joint_adenine(config):
+            from training.selection_validation import verify_selected_sites
+            # Reject missing target classes before opening or scanning any BAM.
+            verify_selected_sites(config, site_root)
         samples = enabled_samples(config)
         for sample in samples:
             require_path(sample['bam'], f'samples.{sample["sample_id"]}.bam')
@@ -76,10 +83,15 @@ def run_training_stage(config, stage):
         from utils.features.position import annotate_positions
         from utils.io.artifacts import completed_run
         gtf = require_path(references['gtf'], 'references.gtf')
+        catalog = require_path(references['catalog'], 'references.catalog')
+        assembly = json.loads(Path(catalog).read_text(encoding='utf-8-sig')).get('assembly')
+        if not isinstance(assembly, str) or not assembly.strip():
+            raise ValueError('The training reference catalog must declare an assembly')
         indices = index_paths(config)
         for path in indices.values():
             completed_run(path.parent)
-        report = dict(sites=annotate_positions(list(indices.values()), gtf, root / 'annotation'))
+        report = dict(sites=annotate_positions(list(indices.values()), gtf, root / 'annotation',
+                                             assembly=assembly))
         return report
     if stage == 'split':
         from training.cross_validation import build_cross_validation

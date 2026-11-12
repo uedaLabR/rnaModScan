@@ -21,6 +21,22 @@ POSITION_FIELDS = ('chrom', 'start', 'end', 'strand') + POSITION_CHANNEL_NAMES +
 _GTF_FEATURES = {'transcript', 'exon', 'CDS', 'stop_codon', 'UTR', 'five_prime_utr', 'three_prime_utr'}
 
 
+def _assembly_key(value):
+    """Recognize naming aliases only for assembly checks; never rewrite coordinates."""
+    aliases = {'hg38': 'GRCh38', 'hg19': 'GRCh37', 'mm10': 'GRCm38', 'mm39': 'GRCm39'}
+    value = re.sub(r'\.p\d+$', '', value)
+    return aliases.get(value, value)
+
+
+def _check_assembly_header(line, assembly):
+    """Check explicit assembly declarations and recognizable human/mouse names."""
+    declared = re.match(r'^#+!?\s*(?:genome[- ]build|genome[- ]version|assembly)(?:\s*[:=]\s*|\s+)(\S+)', line)
+    names = [declared[1]] if declared else []
+    names.extend(re.findall(r'\b(?:GRCh\d+(?:\.p\d+)?|hg19|hg38|GRCm\d+(?:\.p\d+)?|mm10|mm39)\b', line))
+    if any(_assembly_key(name) != _assembly_key(assembly) for name in names):
+        raise ValueError(f'Use an assembly-matched {assembly} GTF; the header specifies another assembly')
+
+
 def checked_position_annotations(path):
     """Load completed GTF reporting metadata with its reference fingerprint."""
     if path is None:
@@ -110,7 +126,10 @@ class Transcript:
 
 class GtfAnnotation:
     """Read GENCODE GTF or GFF3 once; coarse bins avoid a genome-wide scan per site."""
-    def __init__(self, path):
+    def __init__(self, path, *, assembly='GRCh38'):
+        if not isinstance(assembly, str) or not assembly.strip():
+            raise ValueError('Declare a nonempty assembly for position annotations')
+        self.assembly = assembly
         transcripts = {}
         self.chromosomes, self.headers, self.bins = set(), [], {}
         self.bin_size = 100_000
@@ -120,8 +139,7 @@ class GtfAnnotation:
                     continue
                 if line.startswith('#'):
                     self.headers.append(line.rstrip())
-                    if re.search(r'\b(?:GRCh37|hg19|GRCm\d+|mm10|mm39)\b', line):
-                        raise ValueError('Use a human GRCh38 GTF; the header specifies another assembly')
+                    _check_assembly_header(line, assembly)
                     continue
                 columns = line.rstrip('\r\n').split('\t')
                 if len(columns) != 9:
@@ -189,7 +207,7 @@ class GtfAnnotation:
 def _validate_position(row):
     start = int(row['start'])
     if start < 0 or int(row['end']) != start + 1 or row['strand'] not in ('+', '-') or not row['chrom']:
-        raise ValueError('Position annotations require GRCh38 single-base BED coordinates and strand')
+        raise ValueError('Position annotations require assembly-matched single-base BED coordinates and strand')
     values = [int(row[name]) for name in POSITION_CHANNEL_NAMES]
     if any(str(row[name]) not in ('0', '1') for name in POSITION_CHANNEL_NAMES):
         raise ValueError('Position annotation flags must be 0 or 1')
@@ -225,7 +243,7 @@ def position_inputs(row, annotations):
     return [float(annotation[name]) for name in POSITION_CHANNEL_NAMES] if annotation else [0.] * len(POSITION_CHANNEL_NAMES)
 
 
-def annotate_positions(index_paths, gtf_path, output_dir):
+def annotate_positions(index_paths, gtf_path, output_dir, *, assembly='GRCh38'):
     """Annotate unique sites from any number of training/prediction index TSVs.
 
     UTR and CDS use explicit GTF features. Stop codons count as CDS and are
@@ -252,7 +270,7 @@ def annotate_positions(index_paths, gtf_path, output_dir):
     incomplete = output_dir / 'INCOMPLETE.txt'
     incomplete.write_text('Position annotations are being prepared.\n', encoding='utf-8')
     try:
-        annotation = GtfAnnotation(gtf_path)
+        annotation = GtfAnnotation(gtf_path, assembly=assembly)
         partial = output_dir / 'sites.tsv.partial'
         counts = {name: 0 for name in POSITION_CHANNEL_NAMES}
         with partial.open('w', encoding='utf-8', newline='') as handle:
@@ -267,7 +285,7 @@ def annotate_positions(index_paths, gtf_path, output_dir):
             if file_info(before['path']) != {key: before[key] for key in ('path', 'size_bytes', 'mtime_ns')}:
                 raise ValueError('An input changed while producing annotations')
         partial.rename(output_dir / 'sites.tsv')
-        run = dict(status='complete', schema='site_regions_v1', assembly='GRCh38',
+        run = dict(status='complete', schema='site_regions_v1', assembly=assembly,
                    coordinates='BED0', gtf=sources[0], indexes=sources[1:],
                    gtf_headers=annotation.headers, gtf_transcripts=annotation.transcript_count,
                    position_channel_names=list(POSITION_CHANNEL_NAMES), unique_sites=len(sites), counts=counts,

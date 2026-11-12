@@ -14,9 +14,10 @@ from utils.references.catalog import ReferenceCatalog
 _catalog = None
 
 
-def initialize_worker(catalog_path):
+def initialize_worker(catalog_path, mode='inference'):
     global _catalog
-    _catalog = ReferenceCatalog(catalog_path) if catalog_path is not None else None
+    _catalog = (ReferenceCatalog(catalog_path, for_training=mode == 'training')
+                if catalog_path is not None else None)
 
 
 def sample_groups(site_list, sample_id, gap, max_fetch_span=10000000):
@@ -165,7 +166,7 @@ def extract_parallel_groups(site_list, sample, fasta, out, catalog_path, expecte
         write_progress(out, sample, counts, total_sites, total_groups, 0, len(jobs), started)
         context = multiprocessing.get_context('spawn')
         with context.Pool(min(workers, len(jobs)), initializer=initialize_worker,
-                          initargs=(catalog_path,)) as pool:
+                          initargs=(catalog_path, options['mode'])) as pool:
             for completed, result in enumerate(pool.imap_unordered(extract_group_batch, jobs, chunksize=1), 1):
                 accumulate_counts(counts, result['counts'])
                 write_progress(out, sample, counts, total_sites, total_groups, completed, len(jobs), started)

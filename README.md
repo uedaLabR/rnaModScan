@@ -222,23 +222,68 @@ archive nor the detailed TSV is part of the model weights.
 
 ## Training and development
 
-Training uses paired WT/IVT samples and experimental references to construct weak
-labels, followed by grouped cross-validation and a joint adenine model. The
-current model has 23,731 parameters and combines reference sequence/repeat
-features with read features. Reference overlap and weak-label metrics are not
-independent measurements of chemical accuracy.
+You can train new weights using your own **GLORI, Slic-seq, RMBase or other
+positive-site results**. GLORI supplies m6A examples; Slic-seq supplies inosine
+examples; a database or another assay can supply either target. The current
+network jointly classifies m6A, inosine and background, so it needs positive
+examples for **both modifications** and paired WT/IVT sequencing inputs. A
+positive-site file alone cannot replace the tagged BAMs and negative control.
+m5C and pseudouridine remain reference-only targets.
+Sources can be mixed: for example, use GLORI m6A sites with database inosine
+sites, or Slic-seq inosine sites with database m6A sites.
 
-Use a local copy of `training/config.yaml`, replace all study-specific paths,
-set `selection.source_dir: null` for new site-list construction, and select a new
-`output_dir`. Start by inspecting the configuration:
+Create a reference catalog and a fresh configuration, then check the inputs:
 
 ```bash
-cp training/config.yaml configs/local/train.yaml
-# Edit configs/local/train.yaml before running:
+mkdir -p configs/local
+# Edit this manifest's assembly, cell/tissue and positive-site file paths.
+cp training/examples/reference_sources.yaml configs/local/reference_sources.yaml
+rnamodscan references build --manifest configs/local/reference_sources.yaml \
+  --output data/training_references/my_study
+rnamodscan references check \
+  --catalog data/training_references/my_study/catalog.json --training
+
+rnamodscan train init --output configs/local/train.yaml --cell my_tissue \
+  --catalog data/training_references/my_study/catalog.json \
+  --fasta /absolute/path/to/softmasked.fa \
+  --input-dir /absolute/path/to/WT_IVT_inputs --run-dir results/my_training
+# Edit the generated sample filenames before checking:
 rnamodscan train --config configs/local/train.yaml --dry-run
+rnamodscan train check --config configs/local/train.yaml
+# Starts extraction and fitting; run only after the check succeeds:
+rnamodscan train --config configs/local/train.yaml
 ```
 
-The [training guide](training/README.md) describes the stages and dependencies.
+For human HEK293T/HeLa data, the included `data/references/hg38/catalog.json`
+can be used directly instead of building a catalog. `train init` does not start
+training or overwrite an existing configuration. It sets
+`selection.source_dir: null` and selects a fresh output directory.
+`train check` is read-only. The prediction Docker images do not include the
+training package; use the environment in the [training guide](training/README.md).
+
+### Adapting to another species or assembly
+
+Build a catalog declaring your actual assembly/species and supply matching
+WT/IVT BAMs, modkit outputs and a softmasked FASTA/FAI. Training accepts custom
+experimental or database sources, including mouse assays. Columns and
+coordinate conventions must be explicit: no liftover, chromosome renaming or
+human-label transfer is performed. Gene annotation is optional and is not an
+NN input.
+
+After cross-validation, new deployment weights are written to
+`<output_dir>/final_model/adenine/`. Select them explicitly in prediction with
+`model_root: /absolute/path/to/your_run/final_model`. Included human weights are
+never replaced. Prediction reference policies remain unchanged: `mm10` uses
+mouse RMBase only; `other` uses the network without database/short-read rescue.
+See the [other-species walkthrough](docs/TRAINING_CUSTOM_DATA.md#another-species-or-assembly)
+for prediction YAML and motif-rule settings. Cross-species performance of the
+included human model has not been established.
+
+The [custom-data guide](docs/TRAINING_CUSTOM_DATA.md) covers column mappings,
+database-only references, controls, outputs and deployment. References construct
+operational weak labels: an absent match is never made a negative, and overlap
+is not independent chemical validation. The 23,731-parameter model architecture
+is unchanged.
 The [NN design](docs/NN_DESIGN.md), [label preparation](docs/TRAINING_SET_PREPARATION.md)
 and [candidate extraction](docs/CANDIDATE_EXTRACTION.md) document the scientific rules.
 

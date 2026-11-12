@@ -144,12 +144,23 @@ def build_site_bag_index(directories, out, *, require_labels=True):
     fields = list(dict.fromkeys(fields))
     target = None
     sampling_policy = None
+    source_assemblies = set()
+    sources_without_assembly = 0
     try:
         for directory in directories:
             directory = Path(directory).resolve()
             run = completed_run(directory)
             if run['schema'] not in SITE_SCHEMAS:
                 raise ValueError('Expected common per-site Parquet')
+            assembly = run.get('assembly')
+            if assembly is None:
+                sources_without_assembly += 1
+            elif not isinstance(assembly, str) or not assembly.strip():
+                raise ValueError('Feature assembly must be a nonempty identifier')
+            else:
+                source_assemblies.add(assembly)
+            if len(source_assemblies) > 1 or (source_assemblies and sources_without_assembly):
+                raise ValueError('Do not mix feature assemblies or declared and unknown assemblies in one index')
             policy = (run['max_reads'], run['sampling_seed'])
             if sampling_policy is not None and sampling_policy != policy:
                 raise ValueError('Mixed read sampling policies in the same index')
@@ -199,6 +210,8 @@ def build_site_bag_index(directories, out, *, require_labels=True):
                       require_labels=require_labels, feature_sources=sources, counts=dict(counts),
                       max_reads=sampling_policy[0], sampling_seed=sampling_policy[1],
                       index_sha256=sha256(out / 'sites.tsv'))
+        if source_assemblies:
+            report.update(assembly=next(iter(source_assemblies)), coordinates='BED0')
         (out / 'run.json').write_text(json.dumps(report, indent=2) + '\n')
         (out / 'INCOMPLETE.txt').unlink()
         return report

@@ -89,7 +89,7 @@ def annotate_site_metadata(row, sample, catalog, mode):
     chrom, strand = row['chrom'], row['strand']
     start = int(row['start'])
     if not chrom or start < 0 or strand not in ('+', '-'):
-        raise ValueError('Use GRCh38 BED0 coordinates and an explicit strand')
+        raise ValueError('Use assembly-matched BED0 coordinates and an explicit strand')
     if row.get('end') not in (None, '') and int(row['end']) != start + 1:
         raise ValueError('Site intervals must cover one base')
     result = saved_training_labels(row, sample, mode)
@@ -107,6 +107,7 @@ def metadata_provenance(catalog):
     if catalog is None:
         return dict(catalog=None, short_read_scope='explicit_reference_cell', sources=[])
     return dict(catalog=str(catalog.path), catalog_sha256=sha256(catalog.path),
+                assembly=catalog.assembly, coordinates='BED0',
                 short_read_scope='explicit_reference_cell; source_cell must agree; no replicate matching implied',
                 rmbase_scope='RMBase 3.0, applicable exact cell or wildcard',
                 support_interpretation='overlap metadata only; absent/unavailable support never assigns a negative label',

@@ -1,5 +1,9 @@
 # 候補抽出と共通入力（2026-10-29）
 
+2026-11-12追記：新規学習設定・事前確認・GLORI/Slic-seq/DB等の参照表取り込みは
+[カスタムデータ学習ガイド](TRAINING_CUSTOM_DATA.md)にまとめています。
+学習用カタログは任意の明示assemblyを扱えます。予測時の参照規則は以下のとおりです。
+
 2026-11-06追記：予測では`genome: hg38/mm10/other`を選択可能。hg38は従来の参照、
 mm10はRMBase3.0のみ、otherはDB/short-readを使用しない。以下のGRCh38記載はヒト学習データの仕様。
 予測座標は入力BAM/bedMethyl/softmasked FASTAに一致するassemblyのBED0を保持し、assembly変換は行わない。

@@ -18,7 +18,16 @@ def sha256(path):
 
 
 class ReferenceCatalog:
-    def __init__(self, manifest):
+    def __init__(self, manifest, *, for_training=False):
+        """Load exact positive-site evidence for prediction or explicit training.
+
+        Prediction retains its existing human/mouse policies. Training may use
+        a different, explicitly declared assembly and experimental source set;
+        this does not enable cross-species reference rescue during prediction.
+        """
+        if not isinstance(for_training, bool):
+            raise ValueError('for_training must be true or false')
+        self.for_training = for_training
         self.path = Path(manifest).resolve() if manifest is not None else None
         self.sources = []
         self.sites = {}
@@ -28,7 +37,9 @@ class ReferenceCatalog:
             return
         config = json.loads(self.path.read_text(encoding='utf-8-sig'))
         self.assembly = config['assembly']
-        if self.assembly not in ('GRCh38', 'mm10'):
+        if not isinstance(self.assembly, str) or not self.assembly.strip() or self.assembly != self.assembly.strip():
+            raise ValueError('Catalog requires an explicit nonempty assembly name')
+        if not for_training and self.assembly not in ('GRCh38', 'mm10'):
             raise ValueError('Catalog must use GRCh38 or mm10')
         ids = set()
         for source in config['sources']:
@@ -41,7 +52,7 @@ class ReferenceCatalog:
             if s['assembly'] != self.assembly or s.get('coordinates') != 'BED0':
                 hint = 'lift hg19 first' if self.assembly == 'GRCh38' else 'convert other assemblies first'
                 raise ValueError(f'References must be {self.assembly} BED0; {hint}')
-            if self.assembly == 'mm10' and not (s['kind'] == 'database'
+            if not for_training and self.assembly == 'mm10' and not (s['kind'] == 'database'
                     and s.get('database') == 'RMBase' and str(s.get('version')) == '3.0'):
                 continue  # Mouse uses RMBase 3.0 only; never open short-read files.
             if not s.get('cell') or (s['kind'] == 'short_read' and s['cell'] == '*'):
@@ -52,7 +63,8 @@ class ReferenceCatalog:
                 s['status'] = 'unavailable'
                 self.sources.append(s)
                 continue
-            if s['kind'] == 'database' and s.get('database') == 'RMBase' and s.get('version') == '2.0':
+            if (s['kind'] == 'database' and s.get('database') == 'RMBase' and s.get('version') == '2.0'
+                    and (not for_training or self.assembly == 'GRCh38')):
                 if s.get('original_assembly') != 'hg19' or not s.get('conversion_provenance'):
                     raise ValueError('RMBase 2.0 requires hg19-to-GRCh38 conversion provenance')
             p = (self.path.parent / s['path']).resolve()

@@ -20,19 +20,35 @@ python -m pip install matplotlib==3.8.4
 should be used in a separate environment. Existing TF2.10 models cannot be
 loaded directly by TensorFlow 2.19/Keras 3.
 
-Create a local configuration and replace all study-specific input paths:
+Create a fresh local configuration. The existing `training/config.yaml` is a
+study-specific development record and is preserved:
 
 ```bash
 mkdir -p configs/local
-cp training/config.yaml configs/local/train.yaml
+rnamodscan train init --output configs/local/train.yaml --cell HEK293T \
+  --catalog data/references/hg38/catalog.json \
+  --fasta /absolute/path/to/softmasked/hg38.fa \
+  --input-dir /absolute/path/to/WT_IVT_inputs --run-dir results/my_training
 ```
 
-Set a new `output_dir`, paired WT/IVT sample BAMs with indexes, bedMethyl and
-matching pileup logs, a reference catalog, softmasked FASTA with FAI, and the
-GENCODE GTF/GFF3 used for annotation. All paths are resolved from the YAML file.
-For a new dataset, set `selection.source_dir: null`; the template otherwise
-refers to a local, previously prepared site-list directory that is not included
-in Git. Review `samples`, `cv`, `cell_dataset` and `nn` before execution.
+For custom references or another species, pass your catalog instead. See the
+[custom-data guide](../docs/TRAINING_CUSTOM_DATA.md) for GLORI, Slic-seq, RMBase
+and arbitrary positive-site BED/TSV/CSV inputs. Paired WT/IVT BAMs, indexes,
+bedMethyl/logs and an assembly-matched softmasked FASTA/FAI remain required.
+Positive references must cover both m6A and inosine to fit the joint model.
+
+`init` writes only a new YAML and refuses existing configurations/run outputs.
+It sets `selection.source_dir: null`, five folds and a fresh run directory.
+Default sample IDs/filename stems are `sample_WT` and `sample_IVT`; edit YAML
+or pass `--wt-id`/`--ivt-id`. `--reference-cell` selects an explicit catalog
+cell/tissue mapping. Paths are relative to the generated YAML. Add more WT/IVT
+pairs with distinct cell keys if needed; the current pairing accepts one WT and
+one IVT record per cell key, not duplicate replicate records under the same key.
+
+Annotation is reporting-only: `references.gtf: null` skips it in the full
+workflow. An optional same-assembly GTF or GENCODE-style GFF3 must contain
+gene/transcript identifiers. Review `samples`, `cv` and `nn` before execution;
+default training settings are starting values, not validated for every species.
 
 ## Stages
 
@@ -40,10 +56,19 @@ Inspect the plan before starting a new analysis:
 
 ```bash
 rnamodscan train --config configs/local/train.yaml --dry-run
+rnamodscan train check --config configs/local/train.yaml
 ```
 
-The all-stage command runs site construction, selection, feature extraction,
-annotation, grouped CV splitting, fitting and final-model export:
+The dry run opens no input data. The read-only `check` command validates paths,
+indexes, dependency imports, catalog metadata, BAM/FAI contig lengths and output
+collisions without scanning alignments or starting jobs. It returns status
+`ready`/exit 0 or `not_ready`/exit 2 with errors. `--skip-dependencies` performs
+only path/metadata checks; it does not establish runtime readiness. Preparation
+validates reference contents/checksums and actual label classes.
+
+The all-stage command performs preflight, then starts site construction,
+selection, feature extraction, optional annotation, grouped CV splitting,
+fitting and final-model export:
 
 ```bash
 rnamodscan train --config configs/local/train.yaml
@@ -53,6 +78,12 @@ Individual stages can instead be selected with `--stage sites`, `select`,
 `features`, `annotation`, `split`, `fit` or `final`. Use each stage with matching
 inputs and a consistent output directory. Additional inspection stages are
 listed by `rnamodscan train --help`.
+
+Explicit `--stage annotation` still requires a GTF. Choose a new `output_dir`
+for a separate full analysis. Missing classes stop before BAM feature extraction.
+The final stage requires all five completed folds; with `final_epochs: null`
+it selects the median best-validation epoch count. Inspect held-out results in
+`models/adenine/fold_i/test/metrics.json` and training histories under `train/`.
 
 Overlapping genomic windows are grouped across samples, cells, conditions,
 strands and modifications before fold assignment. m6A and inosine candidates
@@ -68,8 +99,20 @@ does not select that separate workflow automatically.
 
 Final prediction bundles contain `model.keras` and `run.json`, including the
 input schema, class order, model configuration and checksum. The current model
-uses `sequence_reads_repeat18_v1` and has 23,731 parameters. Training datasets,
-weights and completed development runs are not included in this repository.
+uses `sequence_reads_repeat18_v1` and has 23,731 parameters. New weights are
+written to `<output_dir>/final_model/adenine/`; set prediction `model_root` to
+the parent `final_model` directory. They have no new held-out evaluation after
+refitting; report the earlier CV test results. The pretrained human deployment
+bundle is included separately; raw training datasets/completed CV runs remain
+local archives. Existing models are not overwritten.
+
+The CPU/GPU Dockerfiles are prediction-only images. For CPU training in a new
+Python 3.10 environment, install `tensorflow-cpu==2.10.1`,
+`-r docker/requirements-runtime.txt` and `matplotlib==3.8.4`, then install the
+project with `python -m pip install --no-deps -e .`. For GPU training use
+`tensorflow==2.10.1` instead, with the compatible host CUDA/cuDNN libraries.
+Do not install both TensorFlow distributions in one environment or combine
+them with the modern extras.
 
 See [label preparation](../docs/TRAINING_SET_PREPARATION.md),
 [candidate extraction](../docs/CANDIDATE_EXTRACTION.md),

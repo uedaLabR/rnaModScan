@@ -16,10 +16,18 @@ DEFAULT_SOURCE_REPORT = ROOT / 'paper/source_data/call_overlap_20261104/site_ind
 def verify_source_report(config, source_report):
     """Check the saved labeling rules and original BED/log identities, without rescanning BED."""
     source = json.loads(Path(source_report).read_text(encoding='utf-8'))
+    assembly = source.get('assembly')
+    if not isinstance(assembly, str) or not assembly.strip():
+        raise ValueError('Saved site lists require an explicit assembly')
+    catalog = config.get('references', {}).get('catalog')
+    if catalog is not None:
+        expected_assembly = json.loads(Path(catalog).read_text(encoding='utf-8-sig')).get('assembly')
+        if assembly != expected_assembly:
+            raise ValueError('Saved site-list assembly differs from the configured reference catalog')
     thresholds = config['candidates']
     expected = {key: thresholds[key] for key in ('min_depth', 'min_modified', 'min_af')}
     if (source.get('status') != 'complete' or source.get('schema') != 'site_lists_v2'
-            or source.get('assembly') != 'GRCh38' or source.get('coordinates') != 'BED0'
+            or source.get('coordinates') != 'BED0'
             or source['thresholds'] != expected or source['ivt_min_modified'] != thresholds['ivt_min_modified']
             or source['ivt_af_ratio'] != thresholds['ivt_af_ratio']):
         raise ValueError('Saved site-list rules differ from the current configuration')
@@ -70,5 +78,9 @@ def verify_selected_sites(config, directory):
     if sum(sample_counts.values()) != run['selected_sites'] or set(sample_counts) != set(samples):
         raise ValueError('Selected dataset site/sample counts disagree')
     if set(class_counts) != set(CLASSES):
-        raise ValueError('Selected dataset must contain all three classes')
+        missing = sorted(set(CLASSES) - set(class_counts))
+        raise ValueError('Selected dataset must contain all three classes; missing: '
+                         + ', '.join(missing)
+                         + '. Supply positive reference evidence for both m6A and inosine '
+                           'and paired IVT-derived negatives; reference non-overlap remains unknown.')
     return path, run, dict(sample_counts), dict(class_counts)

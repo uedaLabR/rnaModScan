@@ -32,7 +32,7 @@ class WorkflowCliTest(unittest.TestCase):
             config = load_config(path, 'predict')
             self.assertEqual(config['output_dir'], directory / 'runs/analysis')
             self.assertIsNone(config['sample']['bam'])
-            self.assertEqual(config['references']['catalog'], (ROOT / 'data/references/catalog.json').resolve())
+            self.assertEqual(config['references']['catalog'], (ROOT / 'data/references/hg38/catalog.json').resolve())
             report = describe_stage(config, 'predict', 'features')
             self.assertIn('analysis_sample.bam', report['unset_inputs'])
             self.assertEqual(report['output'], directory / 'runs/analysis/features')

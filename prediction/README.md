@@ -113,3 +113,17 @@ benchmark, NN inference for 507,501 prepared sites took 26.28 minutes on CPU
 versus 22.73 minutes on GPU. These are inference measurements; the full CPU
 workflow time was estimated, not measured. Cross-species performance remains
 unevaluated.
+
+## Use your own trained model
+
+See [custom-data and other-species training](../docs/TRAINING_CUSTOM_DATA.md).
+Training exports `<training_output>/final_model/adenine/{model.keras,run.json}`;
+set `model_root` to its parent `final_model` directory, or point
+`model_directories.adenine` directly to `adenine`. Use the same compatible
+TensorFlow runtime as training; the loader checks schema, class order and checksum.
+
+Select prediction genome and references explicitly. For a custom assembly,
+`other` disables DB/short-read rescue and requires your matching FASTA/FAI.
+Use `targets: [m6A, inosine]`, `references.gtf: null` and disable
+`filtering.m6a_drach_keep` unless appropriate to that species. The included
+human weights are preserved and are not automatically replaced by training.

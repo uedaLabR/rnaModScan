@@ -56,6 +56,7 @@ def export_final_model(model, dataset, config, index_path, out, *, epochs, class
         raise ValueError('Dataset and exported model target differ')
     if not isinstance(epochs, int) or epochs < 1 or not 0 <= threshold <= 1:
         raise ValueError('Invalid exported epochs or threshold')
+    index_run = completed_run(index_path.parent)
     report = dict(status='complete', role='final_all_labeled_sites', target=config.target,
                   model=asdict(config), model_file='model.keras', model_sha256=None,
                   feature_set=MODEL_INPUT_SCHEMA, threshold=threshold,
@@ -69,9 +70,11 @@ def export_final_model(model, dataset, config, index_path, out, *, epochs, class
                       ml_transform='ML/255', quality_transform='1/(Q+1)',
                       window_mode='genomic', orientation='RNA_5to3', max_reads=config.max_reads, sampling_seed=config.sampling_seed),
                   index_path=str(index_path), index_sha256=sha256(index_path),
-                  feature_sources=completed_run(index_path.parent)['feature_sources'],
+                  feature_sources=index_run['feature_sources'],
                   training_rows=len(dataset.rows), epochs=epochs, class_weights=class_weights,
                   seed=seed, learning_rate=learning_rate, tensorflow_version=tf.__version__)
+    if index_run.get('assembly') is not None:
+        report.update(assembly=index_run['assembly'], coordinates=index_run.get('coordinates', 'BED0'))
     if config.target == 'adenine':
         report['input_schema']['class_names'] = list(CLASSES)
     additional = dict(provenance or {})

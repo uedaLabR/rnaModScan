@@ -66,7 +66,8 @@ def extract_site_bag_sample(site_list, sample, fasta, out, catalog_path, *, mode
     rows = read_sample_metadata(site_list, sample['sample_id'])
     if not rows:
         raise ValueError('No candidate rows for sample')
-    catalog = ReferenceCatalog(catalog_path) if catalog_path is not None else None
+    catalog = (ReferenceCatalog(catalog_path, for_training=mode == 'training')
+               if catalog_path is not None else None)
     return extract_site_bag_rows(site_list, rows, sample, fasta, out, catalog, **options)
 
 

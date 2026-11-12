@@ -112,7 +112,7 @@ def build_site_lists(pairs, catalog_path, out, min_depth=10, min_modified=3, min
                 for key in (f'{condition}_bedmethyl', f'{condition}_pileup_log'):
                     if p.get(key) is None or not Path(p[key]).is_file():
                         raise FileNotFoundError(f'Set existing {key} for {p["cell"]}')
-    catalog = ReferenceCatalog(catalog_path)
+    catalog = ReferenceCatalog(catalog_path, for_training=True)
     out = Path(out)
     out.mkdir(parents=True, exist_ok=False)
     (out / 'INCOMPLETE.txt').write_text('Use only after run.json has status=complete.', encoding='utf-8')
@@ -186,7 +186,7 @@ def build_site_lists(pairs, catalog_path, out, min_depth=10, min_modified=3, min
             for key, value in sorted(counts.items()):
                 writer.writerow([*key, value])
         summarize_site_list(out / 'all_sites.tsv', out / 'summary', pairs, catalog.sources)
-        report = dict(schema='site_lists_v2', status='complete', assembly='GRCh38', coordinates='BED0', pairs=pairs,
+        report = dict(schema='site_lists_v2', status='complete', assembly=catalog.assembly, coordinates='BED0', pairs=pairs,
                       inputs=reports, reference_catalog=str(catalog.path), reference_sources=catalog.sources,
                       thresholds=thresholds, ivt_min_modified=ivt_min_modified, ivt_af_ratio=ivt_af_ratio,
                       window_flank=flank, total_rows=sum(counts.values()),

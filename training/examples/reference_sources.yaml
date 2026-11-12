@@ -1,0 +1,25 @@
+# Copy beside your preselected positive-site files, then edit.
+# Filenames/columns are examples; no biological sites are supplied.
+schema_version: 1
+assembly: GRCh38
+species: Homo sapiens
+sources:
+  - id: my_tissue.m6A.assay
+    kind: short_read
+    cell: my_tissue
+    modification: m6A
+    method: GLORI_or_your_assay
+    path: positive_m6a.tsv
+    format: tsv
+    coordinates: one_based_position
+    columns: {chrom: chromosome, position: position, strand: strand}
+    citation: Your m6A assay and positive-site selection
+  - id: my_tissue.inosine.assay
+    kind: short_read
+    cell: my_tissue
+    modification: inosine
+    method: Slic-seq_or_your_assay
+    path: positive_inosine.bed
+    format: bed
+    coordinates: BED0
+    citation: Your inosine assay and positive-site selection
