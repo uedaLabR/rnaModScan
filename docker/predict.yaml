@@ -1,0 +1,65 @@
+schema_version: 1
+mode: predict
+genome: hg38
+output_dir: /output/analysis_sample
+targets: [m6A, inosine, m5C, pseU]
+
+# These images reuse existing modkit outputs; see docker/README.md.
+modkit:
+  run_pileup: false
+  executable: modkit
+  threads: 4
+  filter_threshold: null
+  mod_thresholds: null
+  include_bed: null
+  seed: null
+
+filtering:
+  reference_only_targets: [m5C, pseU]
+  m6a_drach_keep: true
+
+references:
+  fasta: /genome/hg38.fa
+  gtf: null
+  catalog: /opt/rnaModScan/data/references/hg38/catalog.json
+
+sample:
+  sample_id: analysis_sample
+  cell: HEK293T
+  reference_cell: HEK293T
+  condition: WT
+  bam: /input/sample.bam
+  bedmethyl: /input/sample.bed
+  pileup_log: /input/sample.pileup.log
+  enabled: true
+
+model_root: /opt/rnaModScan/models/pooled_HEK293T_HeLa_20261111
+model_directories: {}
+recalibrate_bam: false
+bam_threads: 2
+
+features:
+  flank: 9
+  min_mapq: 0
+  candidate_group_gap: 10000
+  group_batch_size: 16
+  max_fetch_span: 10000000
+  read_batch_size: 256
+  group_workers: 1
+
+candidates:
+  min_depth: 10
+  min_modified: 3
+  min_af: 0.1
+
+nn:
+  task: adenine_three_class
+  batch_sites: 4
+  device: auto
+  cpu_threads: 4
+
+quality:
+  percentile: 0.1
+  sample_fraction: 1.0
+  seed: 42
+  only_aligned: true

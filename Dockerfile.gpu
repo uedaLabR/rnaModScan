@@ -1,0 +1,73 @@
+# CUDA/cuDNN versions used by TensorFlow 2.10; the host supplies only the driver.
+ARG CUDA_IMAGE=nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04@sha256:56490afc95be92b7e831833eb91668294e18a7c785fdb7af0f03eb7d26aedd52
+FROM ${CUDA_IMAGE} AS python-build
+
+# Build Python in the same OS as the final image, avoiding cross-distro libc
+# dependencies. The TF2.10 official image's Python3.8 is too old for this package.
+ARG PYTHON_VERSION=3.10.22
+ARG PYTHON_SHA256=c61fe9b1a1a7ec2a0b0388e664187c378a5325a89e3606d220abf5bdfccb2543
+ARG BUILD_JOBS=4
+RUN test "$(dpkg --print-architecture)" = "amd64" \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends build-essential ca-certificates \
+       curl libbz2-dev libffi-dev libgdbm-dev liblzma-dev libncursesw5-dev \
+       libreadline-dev libsqlite3-dev libssl-dev uuid-dev xz-utils zlib1g-dev \
+    && curl --fail --show-error --location --retry 3 \
+       "https://www.python.org/ftp/python/${PYTHON_VERSION}/Python-${PYTHON_VERSION}.tar.xz" \
+       --output /tmp/python.tar.xz \
+    && echo "${PYTHON_SHA256}  /tmp/python.tar.xz" | sha256sum --check - \
+    && mkdir /tmp/python-source \
+    && tar --extract --xz --file /tmp/python.tar.xz --directory /tmp/python-source --strip-components=1 \
+    && cd /tmp/python-source \
+    && ./configure --prefix=/opt/python --with-ensurepip=install \
+    && make -j "${BUILD_JOBS}" \
+    && make install \
+    && /opt/python/bin/python3 -c "import bz2, ctypes, lzma, sqlite3, ssl"
+
+FROM ${CUDA_IMAGE}
+LABEL org.opencontainers.image.source="https://github.com/uedaLabR/rnaModScan" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.description="rnaModScan NVIDIA GPU prediction runtime"
+
+ENV PATH=/opt/python/bin:${PATH} \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    TF_CPP_MIN_LOG_LEVEL=2 \
+    NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates libbz2-1.0 \
+       libffi7 libgdbm6 libgomp1 liblzma5 libncursesw6 libreadline8 \
+       libsqlite3-0 libssl1.1 libstdc++6 libuuid1 zlib1g \
+    && rm -rf /var/lib/apt/lists/*
+COPY --from=python-build /opt/python /opt/python
+RUN ln -s python3 /opt/python/bin/python
+
+WORKDIR /opt/rnaModScan
+COPY docker/requirements-runtime.txt docker/requirements-runtime.txt
+RUN python -m pip install pip==25.3 setuptools==80.9.0 wheel==0.45.1 \
+    && python -m pip install tensorflow==2.10.1 -r docker/requirements-runtime.txt
+
+COPY pyproject.toml LICENSE README.md ./
+COPY rnamodscan/ rnamodscan/
+COPY prediction/ prediction/
+COPY utils/ utils/
+COPY docker/ docker/
+COPY models/pooled_HEK293T_HeLa_20261111/ models/pooled_HEK293T_HeLa_20261111/
+COPY data/references/hg38/ data/references/hg38/
+# Build-time checks run on CPU; --device gpu in smoke_test.py checks a GPU host.
+RUN python -m pip install --no-deps --no-build-isolation -e . \
+    && python -m pip check \
+    && python docker/smoke_test.py --device cpu \
+    && chmod -R a+rX /opt/rnaModScan \
+    && useradd --create-home --uid 10001 rnamodscan \
+    && mkdir /work \
+    && chown rnamodscan:rnamodscan /work
+
+WORKDIR /work
+USER 10001:10001
+ENTRYPOINT ["rnamodscan"]
+CMD ["--help"]

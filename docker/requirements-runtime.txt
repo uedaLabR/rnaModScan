@@ -1,0 +1,10 @@
+# Shared runtime for the distributed TensorFlow 2.10 model.
+# Dockerfile.cpu installs tensorflow-cpu; Dockerfile.gpu installs tensorflow.
+keras==2.10.0
+tensorflow-estimator==2.10.0
+numpy==1.23.5
+protobuf==3.19.6
+h5py==3.16.0
+pyarrow==19.0.1
+pysam==0.24.1
+PyYAML==6.0.3

@@ -44,6 +44,34 @@ the base package with `python -m pip install -e .`. The full workflow additional
 needs the libraries in the pinned requirements. External `modkit` is needed only
 when `modkit.run_pileup: true`; existing bedMethyl and pileup logs can be reused.
 
+## Docker: CPU or NVIDIA GPU
+
+[Dockerfile.cpu](Dockerfile.cpu) and [Dockerfile.gpu](Dockerfile.gpu) package the
+prediction workflow with the included final model and human reference BED/JSON
+files. Both target Linux x86_64 containers and preserve TensorFlow 2.10.1/Keras
+2.10.0 compatibility. Sample inputs and the matching softmasked genome are mounted
+separately. The GPU image includes CUDA/cuDNN and needs a compatible NVIDIA driver
+and NVIDIA Container Toolkit on the host.
+
+```bash
+docker build --platform linux/amd64 -f Dockerfile.cpu -t rnamodscan:cpu .
+docker run --rm rnamodscan:cpu predict --help
+
+# NVIDIA GPU host:
+docker build --platform linux/amd64 -f Dockerfile.gpu -t rnamodscan:gpu .
+docker run --rm --gpus all --entrypoint python rnamodscan:gpu \
+  /opt/rnaModScan/docker/smoke_test.py --device gpu
+```
+
+See the [container guide](docker/README.md) for smoke tests, an example YAML,
+read-only input mounts, CPU/GPU prediction and output paths. The images reuse
+existing modkit outputs; external modkit and Dorado are not bundled. Docker
+builds/container GPU execution were not run on the preparation host because its
+daemon was inaccessible; a fresh isolated CPU installation, saved-model smoke
+test and upstream manifest checks passed. Public repository release is planned for the week beginning
+**16 November 2026**; it is currently private. These commands build locally and
+do not assume published container images.
+
 ## Required inputs
 
 Before running prediction, provide:
