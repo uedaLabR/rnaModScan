@@ -126,7 +126,9 @@ class PublicPredictionEndToEndTest(unittest.TestCase):
                 self.assertEqual(row['call_count_inosine'], '2')
             with (output / 'predictions/inosine/all_predictions.tsv').open() as handle:
                 self.assertEqual(list(csv.DictReader(handle, delimiter='\t')), [])
-            self.assertEqual((output / 'predictions/bedmethyl/filtered.bed').read_text(), '')
+            filtered_bed=(output / 'predictions/bedmethyl/filtered.bed').read_text()
+            self.assertTrue(filtered_bed.startswith('#'))
+            self.assertEqual([line for line in filtered_bed.splitlines() if not line.startswith('#')], [])
             with pysam.AlignmentFile(str(output / 'bam/filtered.bam'), 'rb') as handle:
                 reads = list(handle.fetch(until_eof=True))
             self.assertEqual(len(reads), 20)

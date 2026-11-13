@@ -59,7 +59,7 @@ def write_partition_sites(path, destination, chrom, strand):
                         labels.append(name)
                 row['regions'] = ';'.join(labels) or 'unknown'
                 writer.writerow(row)
-                if (row.get('filter_mode') or 'nn') in ('nn', 'nn_drach_keep') and int(row['retained_depth']) > 0:
+                if (row.get('filter_mode') or 'nn') in ('nn', 'nn_drach_keep', 'nn_mettl16_keep') and int(row['retained_depth']) > 0:
                     expected_scores.add(row['row_id'])
     return fields, expected_scores
 
@@ -97,13 +97,13 @@ def merge_count_tables(directories, filename, destination, key_columns):
 
 EMPTY_COUNT_HEADERS = {
     'summary.tsv': ['sample_id', 'modification', 'input_sites', 'predicted_sites', 'unpredicted_sites',
-                    'nn_pass_sites', 'reference_overlap_sites', 'rescued_sites', 'final_kept_sites', 'final_not_kept_sites'],
+                    'nn_pass_sites', 'reference_overlap_sites', 'rescued_sites', 'mettl16_keep_sites', 'final_kept_sites', 'final_not_kept_sites'],
     'decision_counts.tsv': ['sample_id', 'modification', 'prediction_status', 'nn_keep', 'rescued',
                             'final_keep', 'final_reason', 'sites'],
     'source_overlap_counts.tsv': ['sample_id', 'modification', 'source_id', 'source_kind', 'source_cell',
                                  'reference_status', 'overlap_sites', 'nn_pass_sites', 'rescued_sites', 'final_kept_sites'],
     'motif_summary.tsv': ['sample_id', 'modification', 'motif_group', 'input_sites', 'predicted_sites',
-                          'nn_pass_sites', 'reference_overlap_sites', 'rescued_sites', 'drach_keep_sites', 'final_kept_sites'],
+                          'nn_pass_sites', 'reference_overlap_sites', 'rescued_sites', 'drach_keep_sites', 'mettl16_keep_sites', 'final_kept_sites'],
 }
 
 
@@ -192,7 +192,7 @@ def filter_scored_inputs(input_directory, score_directory, out, reference_catalo
             directories.append(directory)
             partitions.append(dict(chrom=key[0], strand=key[1],
                                    path=str(relative / 'all_predictions.tsv')))
-        combine_partition_predictions(directories, out, SITE_FIELDS + ['regions'] + DECISION_FIELDS)
+        combine_partition_predictions(directories, out, list(dict.fromkeys(SITE_FIELDS + ['regions'] + DECISION_FIELDS)))
         report = dict(status='complete', schema='partitioned_predictions_v1', target=inputs['target'],
                       input_directory=str(input_directory.resolve()),
                       input_run_sha256=sha256(input_directory / 'run.json'),

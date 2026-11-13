@@ -7,7 +7,7 @@
 3. m5C/ψは既知部位と一致する候補だけを最終返却する。BAM特徴・NNは使わない。
 4. m6A/InosineはA部位の和集合を作り、候補グループごとにBAMを読む。
 5. 既存と同じ19塩基・18readチャネル等の特徴を、染色体・strand別Parquetへ保存する。
-6. 別プロセスで3クラスNNを実行し、DB/short-read/NN/DRACHの独立フラグORによる最終判定を行う。
+6. 別プロセスで3クラスNNを実行し、DB/short-read/NN/DRACH/METTL16モチーフの独立フラグORによる最終判定を行う。
 7. 必要なら、除外対象のMLを0にしたBAMを出力する。
 
 ## AFは低確信度readを分母に含める
@@ -137,7 +137,8 @@ ParquetはすでにZstd圧縮・dictionary encodingを使っているため、�
 
 ## 最終出力と確認
 
-元bedMethylのPASS行は`predictions/bedmethyl/filtered.bed`、修飾別は同階層の`{target}/filtered.bed`。元列に`flag_db, flag_short_read, flag_nn, flag_drach, filter_pass`を追記する。
+元bedMethylのPASS行は`predictions/bedmethyl/filtered.bed`、修飾別は同階層の`{target}/filtered.bed`。元列に`flag_db, flag_short_read, flag_nn, motif_keep, filter_pass`を追記する。`motif_keep`は0=モチーフ保持なし、1=DRACH保持、2=代表METTL16モチーフ保持とし、各BEDのコメントヘッダーで説明する。詳細TSVでは`flag_drach`/`flag_mettl16`の二つのbinaryフラグを独立に保存する。
+`filtering.m6a_mettl16_keep`が有効なら、対象Aが4番目のRNA鎖方向`UAC[m6A]GAGAA`に一致する元m6A候補を、NN判定と独立に保持する。拡張モチーフや新規候補行は加えない。
 修飾別`predictions/{target}/kept_sites.tsv`が返却部位の詳細表。
 m5C/ψはdepth・AFを通過し、既知部位に一致する行だけを含む。
 `all_predictions.tsv`は除外理由も含む監査表として残し、BAMの除外mapにも使う。

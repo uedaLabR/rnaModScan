@@ -195,6 +195,7 @@ references:
 filtering:
   reference_only_targets: []
   m6a_drach_keep: false
+  m6a_mettl16_keep: false
 ```
 
 This is a fragment to combine with sample paths and remaining fields from
@@ -202,8 +203,9 @@ This is a fragment to combine with sample paths and remaining fields from
 human GRCh38 workflow, and `other` for a custom assembly such as mm39. `other`
 intentionally disables DB/short-read rescue even if a catalog is supplied.
 For this custom-assembly prediction recipe, leave optional annotation off with
-`gtf: null`. Disable the DRACH retention rule unless justified for that species
-and experiment. Set CPU/GPU devices as in the [prediction guide](../prediction/README.md).
+`gtf: null`. Disable both the DRACH and canonical METTL16-motif retention rules
+unless justified for that species and experiment. Set CPU/GPU devices as in the
+[prediction guide](../prediction/README.md).
 
 | Context | Reference behavior |
 |---|---|

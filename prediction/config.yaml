@@ -24,6 +24,8 @@ filtering:
   reference_only_targets: [m5C, pseU]
   # Score both groups; return DRACH candidates regardless of the NN decision.
   m6a_drach_keep: true
+  # Also retain original m6A candidates in UAC[m6A]GAGAA (DNA TACAGAGAA).
+  m6a_mettl16_keep: true
 
 references:
   # Genome for read features/motifs; optional GENCODE GTF annotates output only.

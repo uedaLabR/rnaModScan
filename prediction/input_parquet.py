@@ -17,6 +17,7 @@ INPUT_NAMES = ('sequence_tokens', 'read_features', 'read_mask', 'sequence_repeat
 SITE_FIELDS = list(INDEX_FIELDS) + [name for name in POSITION_FIELDS if name not in INDEX_FIELDS]
 SITE_FIELDS += [name for name in AUDIT_FIELDS if name not in SITE_FIELDS]
 SITE_FIELDS += [field.name for field in metadata_fields() if field.name not in SITE_FIELDS]
+SITE_FIELDS += ['mettl16_motif']
 
 
 def partition_directory(chrom, strand):

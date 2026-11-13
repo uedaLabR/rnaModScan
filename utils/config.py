@@ -204,9 +204,10 @@ def load_config(path, mode=None, *, genome=None):
             raise ValueError('modkit.threads must be a positive integer')
         modkit['include_bed'] = resolve_path(modkit['include_bed'], path.parent)
         filtering = config.setdefault('filtering', {})
-        check_keys(filtering, {'reference_only_targets', 'm6a_drach_keep'}, 'filtering')
+        check_keys(filtering, {'reference_only_targets', 'm6a_drach_keep', 'm6a_mettl16_keep'}, 'filtering')
         filtering.setdefault('reference_only_targets', ['m5C', 'pseU'])
         filtering.setdefault('m6a_drach_keep', False)
+        filtering.setdefault('m6a_mettl16_keep', False)
         reference_only = filtering['reference_only_targets']
         if (not isinstance(reference_only, list) or len(reference_only) != len(set(reference_only))
                 or any(target not in ('m5C', 'pseU') for target in reference_only)):
@@ -215,6 +216,8 @@ def load_config(path, mode=None, *, genome=None):
             raise ValueError('m5C and pseU targets require reference-only filtering')
         if not isinstance(filtering['m6a_drach_keep'], bool):
             raise ValueError('filtering.m6a_drach_keep must be boolean')
+        if not isinstance(filtering['m6a_mettl16_keep'], bool):
+            raise ValueError('filtering.m6a_mettl16_keep must be boolean')
         config['sample'] = read_sample(config.get('sample', {}), path.parent)
         config['model_root'] = resolve_path(config.get('model_root'), path.parent)
         directories = config.setdefault('model_directories', {})

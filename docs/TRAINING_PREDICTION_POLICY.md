@@ -4,11 +4,13 @@ m6A/inosineを共通A部位・3クラスNNへ統合しています。現行出�
 
 | 対象 | 学習/判定 | 返却 |
 | --- | --- | --- |
-| m6A DRACH内外、inosine | 同じ3クラスNN（m6A/inosine/FP） | 元候補についてDB・short-read・NN argmax一致・DRACH（m6Aのみ）の独立フラグをORで返却 |
+| m6A DRACH内外、inosine | 同じ3クラスNN（m6A/inosine/FP） | 元候補についてDB・short-read・NN argmax一致・DRACH・METTL16モチーフ（後二者はm6Aのみ）の独立フラグをORで返却 |
 | m5C/psi | NN学習・推論をしない | depth/AF条件を満たすWTの既知候補だけ |
 
 共通候補はbedMethylのdepth>=10、対象修飾read>=3、AF>=0.1です。DBから未観測部位や別修飾の候補行を追加しません。両修飾の元候補がそれぞれPASSする場合は両方返します。
-flag_db、flag_short_readはWTだけに適用し、IVTは既知参照でrescueしません。元DRACH m6Aの保持はIVTにも適用します。
+flag_db、flag_short_readはWTだけに適用し、IVTは既知参照でrescueしません。元DRACH m6Aとcanonical METTL16モチーフの保持はIVTにも適用します。
+METTL16規則はRNA方向の`UAC[m6A]GAGAA`（DNA `TACAGAGAA`、対象Aは4番目）に一致する元m6A候補だけを保持します。拡張`UAC[m6A]GARAA`や未観測部位・別修飾を追加しません。
+`filtering.m6a_mettl16_keep`はpublic/Docker設定でtrue、省略された既存YAMLではfalseです。元depth/read/AF閾値とNN学習・予測値は変更しません。
 AFの分母はconfidence failureを含み、af_passは監査専用です。
 
 WT正例は細胞対応short-read/RMBase根拠による弱教師です。
@@ -32,4 +34,4 @@ repeat入力後のAlu整合性だけを独立したNN妥当性の証拠としま
 実行は[training](../training/README.md)、[prediction](../prediction/README.md)、
 ラベルの詳細は[統合A部位](ADENINE_THREE_CLASS.md)を参照してください。
 
-元bedMethylのPASS行だけを`predictions/bedmethyl/filtered.bed`と修飾別BEDへ保存します。元列に`flag_db, flag_short_read, flag_nn, flag_drach, filter_pass`の順で5列を追加します。元AF/countは変更しません。TSVは全候補の除外監査も保持します。
+元bedMethylのPASS行だけを`predictions/bedmethyl/filtered.bed`と修飾別BEDへ保存します。元列に`flag_db, flag_short_read, flag_nn, motif_keep, filter_pass`の順で5列を追加します。`motif_keep`は0=モチーフによる保持なし、1=DRACH保持、2=代表METTL16モチーフ保持です。各BEDのコメントヘッダーに列とコードの説明を記録します。元AF/countは変更しません。TSVでは`flag_drach`と`flag_mettl16`を独立したbinaryフラグとして保持し、全候補の除外監査も残します。

@@ -1,15 +1,17 @@
 # rnaModScan
 
-rnaModScan filters RNA modification candidates from Oxford Nanopore direct RNA
-sequencing. It combines Dorado MM/ML calls, reference sequence and read features
-with a shared neural network for **m6A, inosine and false-positive candidates**.
+rnaModScan provides **deep learning-based filtering of RNA modification calls in
+nanopore direct RNA sequencing**. It combines Dorado modification calls and
+per-read confidence scores (MM/ML tags), reference sequence and read features with a shared
+neural network classifier for **m6A, inosine and false-positive candidates**.
 m5C and pseudouridine (`pseU`) are supported through reference overlap only.
 
 The workflow starts from a sorted, indexed BAM and modkit bedMethyl candidates.
 For each original candidate, database overlap, matching-cell experimental
-reference overlap, the neural-network decision and the m6A DRACH rule are
-recorded separately. Their OR determines retention. Reference rescue applies to
-WT samples. The input BAM is preserved; writing a new filtered BAM is optional.
+reference overlap, the neural-network decision and the m6A DRACH and canonical
+METTL16 motif rules are recorded separately. Their OR determines retention.
+Reference-based retention applies to WT samples. The input BAM is preserved; writing a
+new filtered BAM is optional.
 
 ## Installation
 
@@ -142,6 +144,27 @@ HEK293 and HEK293T are distinct reference-cell values. Original site AF, call
 counts and provenance are retained. ML confidence thresholds, site AF thresholds
 and NN scores have separate meanings.
 
+The public prediction and Docker templates enable two independent m6A retention
+rules:
+
+```yaml
+filtering:
+  reference_only_targets: [m5C, pseU]
+  m6a_drach_keep: true
+  m6a_mettl16_keep: true
+```
+
+The latter retains original m6A candidates matching RNA `UAC[m6A]GAGAA`
+(DNA `TACAGAGAA`, candidate A at position 4) in the candidate's strand orientation,
+even when the neural network rejects them. Only this exact nine-base motif is
+used; the broader `UAC[m6A]GARAA` pattern is not retained by this rule.
+Candidates must first pass the normal depth, modified-read-count and AF criteria.
+The motif rule neither adds missing sites nor creates m6A calls from inosine-only
+candidates. Like DRACH retention, it applies to original m6A candidates in WT
+and IVT samples. Set `m6a_mettl16_keep: false` to disable it; an omitted key
+defaults to `false` for existing configurations. This additional retention policy
+does not change the trained network or the reported classifier-only results.
+
 ```bash
 # Inspect configuration without opening BAM or starting inference.
 rnamodscan predict --config configs/local/predict.yaml --device cpu --dry-run
@@ -165,10 +188,27 @@ rnamodscan predict --config configs/local/predict.yaml --stage infer --device cp
 rnamodscan predict --config configs/local/predict.yaml --stage filter --no-recalibrate
 ```
 
-The principal output is `<output_dir>/predictions/bedmethyl/filtered.bed`, with
-original bedMethyl columns followed by `flag_db`, `flag_short_read`, `flag_nn`,
-`flag_drach` and `filter_pass`. Modification-specific files, retained-site tables,
-exclusion audits and summaries are also saved. See the
+### Read the output flags
+
+The principal output is `<output_dir>/predictions/bedmethyl/filtered.bed`. It keeps
+the original bedMethyl columns and appends five columns explaining why each
+original candidate was retained:
+
+| Added column | Meaning |
+|---|---|
+| `flag_db` | `1`: matches an applicable database site in a WT sample |
+| `flag_short_read` | `1`: matches an applicable published experimental site in a WT sample |
+| `flag_nn` | `1`: the neural network classifier predicts the candidate's original modification |
+| `motif_keep` | `0`: neither enabled motif rule applied; `1`: DRACH; `2`: canonical METTL16 motif |
+| `filter_pass` | `1`: at least one retention rule passed; only these rows are exported |
+
+Several flags can support the same candidate. A zero indicates that the
+corresponding retention rule did not apply; it does not establish that the site
+is unmodified. In particular, `motif_keep=0` can reflect a disabled motif rule,
+and the candidate can still pass through another flag. Comment headers explain
+the columns in combined and modification-specific BED files. Detailed TSVs keep
+the two motif flags separately and include rejected candidates and source IDs.
+See the [output flag guide and worked example](docs/OUTPUT_FLAGS.md) and the
 [prediction guide](prediction/README.md).
 
 ## Genome and reference preparation

@@ -84,16 +84,35 @@ new output directory for a separate analysis.
 
 ## Decisions and outputs
 
-m6A and inosine use a shared three-class softmax model. A candidate passes if any
-of its independent evidence flags is set: database overlap, experimental
-reference overlap, matching NN argmax, or DRACH for m6A. Reference flags apply
+m6A and inosine use a shared neural network classifier with three output classes:
+m6A, inosine and false-positive candidates. The classifier supports retention
+when its highest-scoring class matches the candidate's original modification.
+A candidate passes if any of its independent evidence flags is set: database
+overlap, experimental reference overlap, the classifier's decision, DRACH for m6A, or the canonical
+METTL16-associated motif for m6A. Reference flags apply
 only to WT samples. m5C and pseudouridine are reference-only targets. A candidate
 for another modification is never manufactured from an NN prediction.
+
+The public template enables `filtering.m6a_drach_keep` and
+`filtering.m6a_mettl16_keep`. The latter retains an original m6A candidate when
+its strand-oriented sequence is `UAC[m6A]GAGAA` (DNA `TACAGAGAA`, candidate
+adenine at position 4), independently of the neural-network class. The expanded
+`UAC[m6A]GARAA` motif is not included. Both motif rules apply to WT and IVT
+m6A candidates that already passed the depth, modified-read-count and AF
+thresholds; they do not generate missing sites or another modification's rows.
+Set either key to `false` to disable that rule. An omitted
+`m6a_mettl16_keep` defaults to `false`, preserving existing YAML behavior.
+Sequence-based retention does not establish METTL16 dependence or chemical
+accuracy. Previously reported NN-only results remain separate from this final
+retention policy.
 
 Important files under `output_dir`:
 
 - `predictions/bedmethyl/filtered.bed`: retained original bedMethyl rows, with
-  `flag_db`, `flag_short_read`, `flag_nn`, `flag_drach`, `filter_pass` appended.
+  `flag_db`, `flag_short_read`, `flag_nn`, `motif_keep`, `filter_pass` appended.
+  `motif_keep` is `0` for no motif retention, `1` for DRACH retention and `2`
+  for canonical METTL16 motif retention. Comment headers describe the columns
+  and codes in both combined and modification-specific BED files.
 - `predictions/bedmethyl/<target>/filtered.bed`: modification-specific rows.
 - `predictions/<target>/`: retained sites, exclusion audits and summaries.
 - `scores/adenine/run.json`: inference runtime, TensorFlow version and device.
@@ -102,10 +121,19 @@ Important files under `output_dir`:
 Original AF, counts and provenance are retained. ML confidence, site AF and NN
 scores are separate quantities. Reference rescue and reference overlap do not
 establish independent chemical accuracy.
+Detailed TSV audits keep the five independent binary flags, including separate
+`flag_drach` and `flag_mettl16`; the public BED combines those two motif flags
+into the single `motif_keep` code.
+
+The [output flag guide](../docs/OUTPUT_FLAGS.md) explains every added column,
+the difference between an inapplicable rule and a negative chemical result, and
+how several flags can retain the same candidate. It includes a small bedMethyl
+example.
 
 BAM output is optional and disabled by default. Use `--recalibrate` with a full
 run or the filter phase to write a new BAM in which rejected target ML values
-are zeroed. The input BAM is preserved.
+are zeroed. Motif-retained m6A candidates remain retained in this BAM output. The
+input BAM is preserved.
 
 The HEK293T-only model and HeLa prediction run used in development are complete;
 those local datasets and results are not distributed here. In the saved HeLa
@@ -125,5 +153,6 @@ TensorFlow runtime as training; the loader checks schema, class order and checks
 Select prediction genome and references explicitly. For a custom assembly,
 `other` disables DB/short-read rescue and requires your matching FASTA/FAI.
 Use `targets: [m6A, inosine]`, `references.gtf: null` and disable
-`filtering.m6a_drach_keep` unless appropriate to that species. The included
-human weights are preserved and are not automatically replaced by training.
+`filtering.m6a_drach_keep` and `filtering.m6a_mettl16_keep` unless appropriate to
+that species and experiment. The included human weights are preserved and are
+not automatically replaced by training.

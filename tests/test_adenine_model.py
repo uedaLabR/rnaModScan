@@ -124,7 +124,7 @@ class AdenineModelTest(unittest.TestCase):
             with (root / 'output/predictions/adenine/class_counts.tsv').open() as handle:
                 self.assertEqual(sum(int(row['sites']) for row in csv.DictReader(handle, delimiter='\t')),4)
             bed = root / 'output/predictions/bedmethyl/filtered.bed'
-            returned = [line.split() for line in bed.read_text().splitlines()]
+            returned = [line.split() for line in bed.read_text().splitlines() if not line.startswith('#')]
             self.assertEqual(len(returned), 7)
             self.assertTrue(all(len(row) == 23 and row[-1] == '1' for row in returned))
             by_site = {(int(row[1]), row[3]): row for row in returned}

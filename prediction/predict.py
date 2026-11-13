@@ -9,12 +9,14 @@ from utils.nn.inputs import CHANNEL_NAMES, MODIFICATIONS
 from utils.references.catalog import ReferenceCatalog, sha256
 from utils.features.index import INDEX_FIELDS, completed_run
 from prediction.model_bundle import load_model_bundle, validate_input_schema
+from prediction.motifs import mettl16_site
+from utils.references.genome import candidate_nonamer
 
 DECISION_FIELDS = ['reference_cell', 'condition', 'prediction_status', 'keep_score', 'nn_keep',
                    'short_read_sources', 'database_sources', 'reference_overlap', 'rescued',
-                   'drach_keep', 'final_keep', 'final_reason', 'score_m6A', 'score_inosine',
+                   'drach_keep', 'mettl16_keep', 'mettl16_motif', 'final_keep', 'final_reason', 'score_m6A', 'score_inosine',
                    'score_false_positive', 'nn_class', 'final_class',
-                   'flag_db', 'flag_short_read', 'flag_nn', 'flag_drach', 'filter_pass']
+                   'flag_db', 'flag_short_read', 'flag_nn', 'flag_drach', 'flag_mettl16', 'filter_pass']
 
 
 def site_decision(score, threshold, has_reference, condition='WT'):
@@ -89,9 +91,10 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                 (out / 'kept_sites.tsv').open('w', encoding='utf-8', newline='') as kept, \
                 (out / 'kept_sites.bed').open('w', encoding='utf-8') as bed:
             fields = list(site_fields or INDEX_FIELDS)
-            writer = csv.DictWriter(result, fieldnames=fields + DECISION_FIELDS, delimiter='\t', extrasaction='ignore')
+            output_fields = list(dict.fromkeys(fields + DECISION_FIELDS))
+            writer = csv.DictWriter(result, fieldnames=output_fields, delimiter='\t', extrasaction='ignore')
             writer.writeheader()
-            kept_writer = csv.DictWriter(kept, fieldnames=fields + DECISION_FIELDS, delimiter='\t', extrasaction='ignore')
+            kept_writer = csv.DictWriter(kept, fieldnames=output_fields, delimiter='\t', extrasaction='ignore')
             kept_writer.writeheader()
             for row in csv.DictReader(handle, delimiter='\t'):
                 if row['row_id'] in seen:
@@ -104,18 +107,27 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                 database = [s for s in matches if source_by_id[s]['kind'] == 'database']
                 mode = row.get('filter_mode') or 'nn'
                 drach_keep = mode == 'nn_drach_keep'
-                if mode in ('nn', 'nn_drach_keep'):
+                mettl16_keep = mode == 'nn_mettl16_keep'
+                if mode in ('nn', 'nn_drach_keep', 'nn_mettl16_keep'):
                     decision = site_decision(score, threshold, bool(matches), condition)
                     if joint_score is not None:
                         raw_keep = joint_score['predicted_class'] == row['modification']
                         decision['nn_keep'] = int(raw_keep) if score is not None else ''
                         drach_keep = bool(joint_score.get('drach_keep')) and row['modification'] == 'm6A'
+                        mettl16_keep = bool(joint_score.get('mettl16_keep')) and row['modification'] == 'm6A'
                     status = 'predicted' if score is not None else 'no_reads' if int(row['retained_depth']) == 0 else 'no_prediction'
                     if drach_keep and joint_score is None:
                         if row['modification'] != 'm6A' or row.get('motif_group') != 'DRACH':
                             raise ValueError('DRACH retention requires an annotated m6A DRACH candidate')
                         decision.update(final_keep=1, final_reason='nn_and_drach' if decision['nn_keep'] == 1 else 'drach_keep',
                                         rescued=0)
+                    if mettl16_keep:
+                        if row['modification'] != 'm6A' or not mettl16_site(row):
+                            raise ValueError('METTL16 retention requires an annotated canonical m6A motif candidate')
+                        if joint_score is None:
+                            decision.update(final_keep=1,
+                                            final_reason='nn_and_mettl16' if decision['nn_keep'] == 1 else 'mettl16_keep',
+                                            rescued=0)
                 else:
                     if score is not None:
                         raise ValueError('Policy-only sites must not have a neural score')
@@ -123,7 +135,8 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                     status = mode
                 flags = dict(flag_db=int(condition == 'WT' and bool(database)),
                              flag_short_read=int(condition == 'WT' and bool(short)),
-                             flag_nn=int(decision['nn_keep'] == 1), flag_drach=int(drach_keep))
+                             flag_nn=int(decision['nn_keep'] == 1), flag_drach=int(drach_keep),
+                             flag_mettl16=int(mettl16_keep))
                 final_keep = any(flags.values())
                 # Separate evidence columns are independent; any one retains the original candidate.
                 decision.update(final_keep=int(final_keep),
@@ -133,7 +146,10 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                     reasons = [name.removeprefix('flag_') for name, value in flags.items() if value]
                     decision['final_reason'] = '+'.join(reasons) if reasons else 'filter_fail'
                 record = dict(row, reference_cell=reference_cell, condition=condition, prediction_status=status,
-                              keep_score='' if score is None else score, drach_keep=int(drach_keep), short_read_sources=';'.join(short),
+                              keep_score='' if score is None else score, drach_keep=int(drach_keep),
+                              mettl16_keep=int(mettl16_keep),
+                              mettl16_motif=row.get('mettl16_motif') or candidate_nonamer(row.get('reference_sequence')),
+                              short_read_sources=';'.join(short),
                               database_sources=';'.join(database), reference_overlap=int(bool(matches)), **decision, **flags, filter_pass=int(final_keep))
                 record.update(score_m6A=joint_score['score_m6A'] if joint_score else '',
                               score_inosine=joint_score['score_inosine'] if joint_score else '',
@@ -148,6 +164,7 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                 for metric, value in dict(input_sites=1, predicted_sites=score is not None,
                                           unpredicted_sites=score is None, nn_pass_sites=decision['nn_keep'] == 1,
                                           reference_overlap_sites=bool(matches), rescued_sites=decision['rescued'],
+                                          mettl16_keep_sites=mettl16_keep,
                                           final_kept_sites=decision['final_keep'], final_not_kept_sites=not decision['final_keep']).items():
                     counts[key + (metric,)] += int(value)
                 if row['modification'] == 'm6A':
@@ -155,7 +172,8 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                     for metric, value in dict(input_sites=1, predicted_sites=score is not None,
                                               nn_pass_sites=decision['nn_keep'] == 1,
                                               reference_overlap_sites=bool(matches), rescued_sites=decision['rescued'],
-                                              drach_keep_sites=drach_keep, final_kept_sites=decision['final_keep']).items():
+                                              drach_keep_sites=drach_keep, mettl16_keep_sites=mettl16_keep,
+                                              final_kept_sites=decision['final_keep']).items():
                         motif_counts[key + (group, metric)] += int(value)
                 details[key + (status, str(decision['nn_keep']), decision['rescued'],
                                decision['final_keep'], decision['final_reason'])] += 1
@@ -167,7 +185,7 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
             raise ValueError('Model scores include unknown candidate IDs')
         keys = sorted({(sample, mod) for sample, mod, metric in counts})
         metrics = ['input_sites', 'predicted_sites', 'unpredicted_sites', 'nn_pass_sites',
-                   'reference_overlap_sites', 'rescued_sites', 'final_kept_sites', 'final_not_kept_sites']
+                   'reference_overlap_sites', 'rescued_sites', 'mettl16_keep_sites', 'final_kept_sites', 'final_not_kept_sites']
         with (out / 'summary.tsv').open('w', encoding='utf-8', newline='') as handle:
             writer = csv.writer(handle, delimiter='\t')
             writer.writerow(['sample_id', 'modification', *metrics])
@@ -179,7 +197,7 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
         with (out / 'motif_summary.tsv').open('w', encoding='utf-8', newline='') as handle:
             writer = csv.writer(handle, delimiter='\t')
             metrics = ['input_sites', 'predicted_sites', 'nn_pass_sites', 'reference_overlap_sites',
-                       'rescued_sites', 'drach_keep_sites', 'final_kept_sites']
+                       'rescued_sites', 'drach_keep_sites', 'mettl16_keep_sites', 'final_kept_sites']
             writer.writerow(['sample_id', 'modification', 'motif_group', *metrics])
             for key in sorted({key[:3] for key in motif_counts}):
                 writer.writerow([*key, *[motif_counts[key + (metric,)] for metric in metrics]])
@@ -199,8 +217,9 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                       reference_sources=catalog.sources,
                       policies=dict(reference_only='m5C/psi: keep known WT candidates only; blank NN score',
                                     drach='when enabled, score all m6A candidates and retain DRACH independently of NN score',
+                                    mettl16='when enabled, retain original m6A candidates with canonical UAC[m6A]GAGAA independently of NN; not the expanded GARAA motif',
                                     rescue='WT candidates only; exact chromosome/BED0 start/strand/target modification',
-                                    output='original candidates only; PASS is OR of independent DB, short-read, NN and DRACH flags',
+                                    output='original candidates only; PASS is OR of independent DB, short-read, NN, DRACH and METTL16-motif flags',
                                     ivt='no reference rescue; neural score retained for background-call auditing',
                                     missing_prediction='keep blank score/status; reference rescue may retain WT candidates',
                                     interpretation='neural filtering and reference-based rescue decisions, not independent experimental truth',

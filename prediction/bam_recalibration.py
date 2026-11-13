@@ -12,6 +12,7 @@ import sqlite3
 from utils.io.artifacts import completed_run, file_info
 from utils.io.cigar import CigarIndex
 from utils.references.catalog import sha256
+from prediction.evidence import evidence_values
 
 TARGET_CODES = {'a': 'm6A', 'm': 'm5C', '17596': 'inosine', '17802': 'pseU'}
 _MM_GROUP = re.compile(r'([ACGTUN])([+-])([a-z]+|[0-9]+)[.?]?((?:,[0-9]+)*)')
@@ -28,6 +29,10 @@ def read_site_decision(row):
         raise ValueError('Prediction final_keep/rescued must be 0 or 1')
     if row['rescued'] == '1' and row['final_keep'] != '1':
         raise ValueError('A rescued site must be retained')
+    if 'flag_mettl16' in row:
+        flags = evidence_values(row)
+        if row['final_keep'] != str(int('1' in flags)):
+            raise ValueError('Final decision must agree with independent evidence flags')
     if row['prediction_status'] == 'reference_only':
         if (row['modification'] not in ('m5C', 'pseU') or row['keep_score'] or row['nn_keep']
                 or row['rescued'] != '0'):
@@ -45,8 +50,8 @@ def read_site_decision(row):
         if (row['modification'] not in ('m6A', 'inosine') or row['nn_class'] not in CLASSES
                 or row['nn_keep'] != str(int(row['nn_class'] == row['modification']))):
             raise ValueError('Joint class and NN decision disagree')
-        flags = [row.get(name) for name in ('flag_db', 'flag_short_read', 'flag_nn', 'flag_drach')]
-        if any(value not in ('0', '1') for value in flags) or row['final_keep'] != str(int('1' in flags)):
+        flags = evidence_values(row)
+        if row['final_keep'] != str(int('1' in flags)):
             raise ValueError('Final decision must agree with independent evidence flags')
         return site, 'retained' if row['final_keep'] == '1' else 'rejected'
     if row['final_keep'] == '0':

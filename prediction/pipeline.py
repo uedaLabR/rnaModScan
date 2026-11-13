@@ -114,7 +114,8 @@ def run_prediction_stage(config, stage, *, isolate_gpu=False):
             from prediction.adenine_filtering import filter_joint_inputs
             filter_joint_inputs(root / 'nn_inputs' / 'adenine', root / 'scores' / 'adenine',
                 root / 'predictions', catalog, sample['reference_cell'], condition=sample['condition'],
-                m6a_drach_keep=config['filtering']['m6a_drach_keep'])
+                m6a_drach_keep=config['filtering']['m6a_drach_keep'],
+                m6a_mettl16_keep=config['filtering'].get('m6a_mettl16_keep', False))
         directories = []
         for target in config['targets']:
             out = root / 'predictions' / target

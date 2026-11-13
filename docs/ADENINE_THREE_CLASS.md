@@ -70,9 +70,13 @@ validation/testは混同行列、各class precision/recall/F1、macro-F1、accur
 - `flag_short_read`: WT候補と対応細胞の参照一致。
 - `flag_nn`: 3クラスargmaxが元候補の修飾と一致。
 - `flag_drach`: 保持設定が有効な元m6A DRACH候補。Inosineでは常に0。
+- `flag_mettl16`: 保持設定が有効な元m6A候補で、RNA鎖方向の`UAC[m6A]GAGAA`に一致。Inosineでは常に0。
 
-どれかが1なら`filter_pass=1`。m5C/ψのNN/DRACHフラグは0。
-IVTはDB/short-readフラグ0だが、元DRACH保持は同じ規則で適用する。
+どれかが1なら`filter_pass=1`。m5C/ψのNN/DRACH/METTL16フラグは0。
+IVTはDB/short-readフラグ0だが、元DRACH/METTL16モチーフ保持は同じ規則で適用する。
+`filtering.m6a_mettl16_keep`はpublic/Docker設定で有効、既存YAMLで省略時はfalse。
+対象Aは9塩基の4番目（DNA表現`TACAGAGAA`）で、拡張モチーフ`UAC[m6A]GARAA`は含めない。
+元候補のdepth/AF/read条件を維持し、NNで除外された対象も追加規則で保持する。モチーフ一致だけではMETTL16依存性を証明しない。
 NNは3クラスのままで、閾値とargmaxを混同しない。
 同じ位置の両修飾がPASSしてもよい。元のdepth/AF条件を通過しない別修飾の行を生成しない。
 `final_class`は部位auditでは返却修飾のセミコロン列、修飾別auditでは保持時の当該修飾（除外時は空欄）。

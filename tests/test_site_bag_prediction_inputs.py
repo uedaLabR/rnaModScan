@@ -147,6 +147,29 @@ class SiteBagPredictionInputsTest(unittest.TestCase):
                     self.assertNotEqual(original.stat().st_ino, saved.stat().st_ino)
                     self.assertEqual(original.read_bytes(), saved.read_bytes())
 
+    def test_new_motif_proof_is_metadata_without_rewriting_legacy_feature_tensors(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            index,model,source,fields,rows=self.fixture(root)
+            fields=[*fields,'mettl16_motif']
+            for row in rows:
+                row['mettl16_motif']='TACAGAGAA'
+            self.write_index(index,fields,rows)
+            manifest=index.parent/'run.json'
+            run=json.loads(manifest.read_text());run['index_sha256']=sha256(index)
+            manifest.write_text(json.dumps(run))
+            original={p.relative_to(source).as_posix():sha256(p) for p in source.rglob('*.parquet')}
+            with patch('utils.features.site_dataset.SiteBagBatches._batch',side_effect=AssertionError('Tensor rewrite')):
+                prepared=prepare_site_bag_prediction_inputs(index,model,root/'prepared')
+            observed=[]
+            for part in prepared['partitions']:
+                observed.extend(pq.read_table(root/'prepared'/part['sites_path']).to_pylist())
+                for shard in part['input_shards']:
+                    self.assertEqual(sha256(root/'prepared'/shard['path']),sha256(shard['source_path']))
+            self.assertEqual(len(observed),4)
+            self.assertTrue(all(row['mettl16_motif']=='TACAGAGAA' for row in observed))
+            self.assertEqual(original,{p.relative_to(source).as_posix():sha256(p) for p in source.rglob('*.parquet')})
+
     def test_nonnull_training_flags_and_unindexed_source_sites_are_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

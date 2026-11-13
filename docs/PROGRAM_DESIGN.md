@@ -20,7 +20,7 @@ NNは参照3-mer＋binary repeatと、最大300readの18ch特徴を独立に処�
 - validationでepochを選び、testはその後に評価します。class weightはtrain件数だけから作ります。
 - 実解析はprepare/infer/filterを分け、GPU processは準備済み4入力とモデルだけを読みます。
 - DB照合はsourceごとの(chrom,start,strand) set、適用sourceは細胞/修飾別にcacheします。
-- 元BEDのPASS行へDB/short-read/NN/DRACHの独立4フラグとOR結果を追記します。既存列は保持します。
+- 詳細TSVはDB/short-read/NN/DRACH/METTL16モチーフの独立5フラグを保持します。元BEDのPASS行にはDB/short-read/NNの3フラグ、二つのモチーフ規則をまとめた`motif_keep`（0=なし、1=DRACH、2=代表METTL16）とOR結果を追記し、コメントヘッダーで説明します。既存列は保持します。
 - rescues/BAM書換えは染色体/strand単位に処理し、最終返却と除外auditを分けます。
 
 全量再学習のモデルはhold-out評価には使いません。既知参照で作った教師に対する内部評価を独立実証と呼びません。
