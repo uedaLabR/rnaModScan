@@ -6,8 +6,7 @@ Keras 2.10.0, which are required to load the distributed saved model. No trainin
 or separate model download is needed. These are **prediction images**; Dorado
 basecalling, model training and manuscript tools are not included.
 
-The repository is currently private. Public release is planned for the week
-beginning **16 November 2026**. The commands below build images from a checkout;
+The commands below build images from a checkout;
 they do not assume that prebuilt images are available in a registry.
 
 ## Platform and prerequisites

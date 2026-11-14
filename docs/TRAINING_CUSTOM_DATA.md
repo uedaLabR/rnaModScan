@@ -26,7 +26,11 @@ Reference sites alone cannot train the model. Unmatched reference sites and
 missing IVT coverage are unknown, never automatic negatives. The current
 workflow does not accept a positive-only assay as a substitute for the IVT
 control or as evidence for a modification it did not measure. m5C and
-pseudouridine remain reference-only prediction targets.
+pseudouridine use known-site/motif retention without NN training. Their
+known-site route keeps the depth ≥10, modified reads ≥3 and AF ≥0.10 candidate
+defaults. Only the motif route adds depth ≥20 and AF ≥0.40, controlled by
+`filtering.auxiliary_motif_min_depth` and `filtering.auxiliary_motif_min_af`.
+m6A/inosine and training thresholds are unchanged.
 
 ## Import positive-site files
 
@@ -196,6 +200,10 @@ filtering:
   reference_only_targets: []
   m6a_drach_keep: false
   m6a_mettl16_keep: false
+  m5c_nsun6_keep: false
+  m5c_nsun2_keep: false
+  pseu_trub1_keep: false
+  pseu_pus7_keep: false
 ```
 
 This is a fragment to combine with sample paths and remaining fields from
@@ -203,8 +211,10 @@ This is a fragment to combine with sample paths and remaining fields from
 human GRCh38 workflow, and `other` for a custom assembly such as mm39. `other`
 intentionally disables DB/short-read rescue even if a catalog is supplied.
 For this custom-assembly prediction recipe, leave optional annotation off with
-`gtf: null`. Disable both the DRACH and canonical METTL16-motif retention rules
-unless justified for that species and experiment. Set CPU/GPU devices as in the
+`gtf: null`. Disable motif-retention rules unless justified for that species
+and experiment. The four m5C/Ψ keys matter only when those targets are included;
+`other` still permits motif-only retention when a rule is enabled. See the
+[output motif codes](OUTPUT_FLAGS.md#motif-codes). Set CPU/GPU devices as in the
 [prediction guide](../prediction/README.md).
 
 | Context | Reference behavior |

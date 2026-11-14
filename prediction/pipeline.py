@@ -52,7 +52,7 @@ def run_prediction_stage(config, stage, *, isolate_gpu=False):
         route_prediction_sites(root / 'candidates', root / 'routing', config['targets'],
                                config['filtering'], references['fasta'], joint=joint_adenine(config))
         if not neural_targets:
-            return dict(status='not_required', reason='all targets use known-site overlap only')
+            return dict(status='not_required', reason='all targets use known-site or enabled motif rules without neural inputs')
         require_path(sample['bam'], 'sample.bam')
         sites = {target: root / 'routing' / target / 'nn_sites.tsv' for target in neural_targets}
         if joint_adenine(config):
@@ -124,13 +124,17 @@ def run_prediction_stage(config, stage, *, isolate_gpu=False):
                 continue
             scores = root / 'scores' / target if target in neural_targets else None
             filter_scored_inputs(root / 'nn_inputs' / target, scores, out,
-                                 catalog, sample['reference_cell'], condition=sample['condition'])
+                                 catalog, sample['reference_cell'], condition=sample['condition'],
+                                 auxiliary_motif_min_depth=config['filtering'].get('auxiliary_motif_min_depth',20),
+                                 auxiliary_motif_min_af=config['filtering'].get('auxiliary_motif_min_af',.40))
             directories.append(out)
         report = combine_predictions(directories, root / 'predictions' / 'summary', include_sites=False)
         from prediction.bed_output import export_filtered_bed
         bedmethyl, _ = prediction_pileup_paths(config)
         report['filtered_bed'] = export_filtered_bed(bedmethyl, directories, sample['sample_id'],
-                                                    root / 'predictions' / 'bedmethyl')
+                                                    root / 'predictions' / 'bedmethyl',
+                                                    auxiliary_motif_min_depth=config['filtering'].get('auxiliary_motif_min_depth',20),
+                                                    auxiliary_motif_min_af=config['filtering'].get('auxiliary_motif_min_af',.40))
         return report
     if stage == 'bam':
         from prediction.bam_recalibration import write_filtered_bam

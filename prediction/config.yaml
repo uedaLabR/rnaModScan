@@ -22,10 +22,18 @@ modkit:
 
 filtering:
   reference_only_targets: [m5C, pseU]
+  # Stronger cutoffs apply ONLY to m5C/pseU motif retention; known sites keep the original thresholds.
+  auxiliary_motif_min_depth: 20
+  auxiliary_motif_min_af: 0.40
   # Score both groups; return DRACH candidates regardless of the NN decision.
   m6a_drach_keep: true
   # Also retain original m6A candidates in UAC[m6A]GAGAA (DNA TACAGAGAA).
   m6a_mettl16_keep: true
+  # Sequence-only retention of original m5C/pseU candidates (motif codes 3–6).
+  m5c_nsun6_keep: true
+  m5c_nsun2_keep: true
+  pseu_trub1_keep: true
+  pseu_pus7_keep: true
 
 references:
   # Genome for read features/motifs; optional GENCODE GTF annotates output only.

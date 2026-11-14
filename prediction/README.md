@@ -46,8 +46,8 @@ rethresholding. To create them from the BAM, install modkit separately and set
 
 Use `genome: hg38`, `mm10` or `other`; `--genome` overrides YAML. Human analysis
 uses human RMBase and explicitly matching-cell experimental references. Mouse
-analysis uses RMBase 3.0 only. `other` disables both reference types and returns
-no m5C/pseudouridine sites. Preparation always requires an assembly-matched
+analysis uses RMBase 3.0 only. `other` disables both reference types, but enabled
+motif rules can still retain m5C/pseudouridine candidates. Preparation requires an assembly-matched
 softmasked FASTA and FAI. There is no automatic liftover or chromosome renaming.
 See [reference preparation](../source/README.md).
 
@@ -88,13 +88,34 @@ m6A and inosine use a shared neural network classifier with three output classes
 m6A, inosine and false-positive candidates. The classifier supports retention
 when its highest-scoring class matches the candidate's original modification.
 A candidate passes if any of its independent evidence flags is set: database
-overlap, experimental reference overlap, the classifier's decision, DRACH for m6A, or the canonical
-METTL16-associated motif for m6A. Reference flags apply
-only to WT samples. m5C and pseudouridine are reference-only targets. A candidate
-for another modification is never manufactured from an NN prediction.
+overlap, experimental reference overlap, the classifier's decision or one of six
+modification-specific motif rules. Reference flags apply only to WT samples.
+m5C and pseudouridine have an auxiliary reporting function using known-site
+overlap or enabled motif rules, without neural-network scores. Known-site
+retention keeps the original depth ≥10, target-modified reads ≥3 and AF ≥0.10
+defaults. Only the m5C/Ψ motif route requires depth ≥20 and AF ≥0.40, with the
+same original modified-read requirement. m6A/inosine defaults are unchanged.
+A candidate for another modification is never manufactured from an NN prediction.
+
+Configure the extra m5C/Ψ motif gate under `filtering`:
+
+```yaml
+filtering:
+  auxiliary_motif_min_depth: 20
+  auxiliary_motif_min_af: 0.40
+```
+
+These defaults also apply when the keys are omitted. The final filter rechecks
+the motif gate against original site counts, including for older saved routing.
+`all_predictions.tsv` retains original candidates and reference-overlap facts.
+For m5C/Ψ, `auxiliary_motif_eligible=0` disables motif flags/codes 3–6, while
+known-site flags and PASS can still be 1 under the original candidate criteria.
+For example, a known m5C candidate with 10 reads and 3 modified reads can pass
+with `motif_keep=0`, even if its sequence also matches a motif.
 
 The public template enables `filtering.m6a_drach_keep` and
-`filtering.m6a_mettl16_keep`. The latter retains an original m6A candidate when
+`filtering.m6a_mettl16_keep`, plus the four m5C/Ψ rules below.
+`m6a_mettl16_keep` retains an original m6A candidate when
 its strand-oriented sequence is `UAC[m6A]GAGAA` (DNA `TACAGAGAA`, candidate
 adenine at position 4), independently of the neural-network class. The expanded
 `UAC[m6A]GARAA` motif is not included. Both motif rules apply to WT and IVT
@@ -106,12 +127,28 @@ Sequence-based retention does not establish METTL16 dependence or chemical
 accuracy. Previously reported NN-only results remain separate from this final
 retention policy.
 
+| Key under `filtering` | Motif code | Original target and RNA pattern |
+|---|---|---|
+| `m5c_nsun6_keep` | `3` | m5C, NSUN6-associated `[m5C]UCCA` |
+| `m5c_nsun2_keep` | `4` | m5C, NSUN2-associated G-rich `[m5C]NGGG` |
+| `pseu_trub1_keep` | `5` | pseudouridine, TRUB1-associated `GU[Ψ]CNANNC` |
+| `pseu_pus7_keep` | `6` | pseudouridine, classic PUS7-associated `UG[Ψ]AR` |
+
+These four keys are enabled in the supplied prediction/Docker templates and
+default to `false` if omitted from older YAML. They apply to WT and IVT
+candidates that passed the original candidate thresholds and the extra
+m5C/Ψ motif depth/AF gate, using the matching strand-oriented FASTA. The legacy `reference_only_targets` name denotes the
+NN-free branch; m5C/Ψ motif rules also apply there. These sequence-only rules
+do not test secondary structure or confirm modification/writer dependence.
+N={A,C,G,U}, R={A,G}; brackets locate the candidate. The broader PUS7
+`UN[Ψ]AR` pattern is not used.
+
 Important files under `output_dir`:
 
 - `predictions/bedmethyl/filtered.bed`: retained original bedMethyl rows, with
   `flag_db`, `flag_short_read`, `flag_nn`, `motif_keep`, `filter_pass` appended.
-  `motif_keep` is `0` for no motif retention, `1` for DRACH retention and `2`
-  for canonical METTL16 motif retention. Comment headers describe the columns
+  `motif_keep` is `0` for no motif retention, `1` for DRACH, `2` for canonical
+  METTL16 and `3`–`6` for the m5C/Ψ motifs listed above. Comment headers describe the columns
   and codes in both combined and modification-specific BED files.
 - `predictions/bedmethyl/<target>/filtered.bed`: modification-specific rows.
 - `predictions/<target>/`: retained sites, exclusion audits and summaries.
@@ -121,9 +158,10 @@ Important files under `output_dir`:
 Original AF, counts and provenance are retained. ML confidence, site AF and NN
 scores are separate quantities. Reference rescue and reference overlap do not
 establish independent chemical accuracy.
-Detailed TSV audits keep the five independent binary flags, including separate
-`flag_drach` and `flag_mettl16`; the public BED combines those two motif flags
-into the single `motif_keep` code.
+Detailed TSV audits keep nine independent binary flags: DB, experimental
+reference, NN, `flag_drach`, `flag_mettl16`, `flag_nsun6`, `flag_nsun2`,
+`flag_trub1` and `flag_pus7`. The public BED combines the six motif flags
+into the single `motif_keep` code, preserving five appended columns.
 
 The [output flag guide](../docs/OUTPUT_FLAGS.md) explains every added column,
 the difference between an inapplicable rule and a negative chemical result, and
@@ -132,8 +170,8 @@ example.
 
 BAM output is optional and disabled by default. Use `--recalibrate` with a full
 run or the filter phase to write a new BAM in which rejected target ML values
-are zeroed. Motif-retained m6A candidates remain retained in this BAM output. The
-input BAM is preserved.
+are zeroed. Candidates retained by any enabled motif rule remain retained in
+this BAM output. The input BAM is preserved.
 
 The HEK293T-only model and HeLa prediction run used in development are complete;
 those local datasets and results are not distributed here. In the saved HeLa
@@ -154,5 +192,6 @@ Select prediction genome and references explicitly. For a custom assembly,
 `other` disables DB/short-read rescue and requires your matching FASTA/FAI.
 Use `targets: [m6A, inosine]`, `references.gtf: null` and disable
 `filtering.m6a_drach_keep` and `filtering.m6a_mettl16_keep` unless appropriate to
-that species and experiment. The included human weights are preserved and are
+that species and experiment. If including m5C/Ψ targets, also review or disable
+the four motif rules above for the species. The included human weights are preserved and are
 not automatically replaced by training.

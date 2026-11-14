@@ -16,9 +16,15 @@ modkit:
 
 filtering:
   reference_only_targets: [m5C, pseU]
+  auxiliary_motif_min_depth: 20
+  auxiliary_motif_min_af: 0.40
   m6a_drach_keep: true
   # Candidate-aligned UAC[m6A]GAGAA, independently of the NN decision.
   m6a_mettl16_keep: true
+  m5c_nsun6_keep: true
+  m5c_nsun2_keep: true
+  pseu_trub1_keep: true
+  pseu_pus7_keep: true
 
 references:
   fasta: /genome/hg38.fa

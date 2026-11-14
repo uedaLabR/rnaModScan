@@ -4,12 +4,14 @@ rnaModScan provides **deep learning-based filtering of RNA modification calls in
 nanopore direct RNA sequencing**. It combines Dorado modification calls and
 per-read confidence scores (MM/ML tags), reference sequence and read features with a shared
 neural network classifier for **m6A, inosine and false-positive candidates**.
-m5C and pseudouridine (`pseU`) are supported through reference overlap only.
+m5C and pseudouridine (`pseU`) have an auxiliary reporting function that retains
+original candidates through known-site overlap or enabled sequence-motif rules,
+without neural-network scoring.
 
 The workflow starts from a sorted, indexed BAM and modkit bedMethyl candidates.
 For each original candidate, database overlap, matching-cell experimental
-reference overlap, the neural-network decision and the m6A DRACH and canonical
-METTL16 motif rules are recorded separately. Their OR determines retention.
+reference overlap, the neural-network decision and six modification-specific
+motif rules are recorded separately. Their OR determines retention.
 Reference-based retention applies to WT samples. The input BAM is preserved; writing a
 new filtered BAM is optional.
 
@@ -70,8 +72,7 @@ read-only input mounts, CPU/GPU prediction and output paths. The images reuse
 existing modkit outputs; external modkit and Dorado are not bundled. Docker
 builds/container GPU execution were not run on the preparation host because its
 daemon was inaccessible; a fresh isolated CPU installation, saved-model smoke
-test and upstream manifest checks passed. Public repository release is planned for the week beginning
-**16 November 2026**; it is currently private. These commands build locally and
+test and upstream manifest checks passed. These commands build locally and
 do not assume published container images.
 
 ## Required inputs
@@ -144,17 +145,36 @@ HEK293 and HEK293T are distinct reference-cell values. Original site AF, call
 counts and provenance are retained. ML confidence thresholds, site AF thresholds
 and NN scores have separate meanings.
 
-The public prediction and Docker templates enable two independent m6A retention
-rules:
+The supplied prediction/Docker templates use these reporting defaults:
+
+| Target and retention route | Minimum depth | Minimum target-modified reads | Minimum AF |
+|---|---|---|---|
+| m6A / inosine | 10 | 3 | 0.10 |
+| m5C / pseudouridine, known-site route | 10 | 3 | 0.10 |
+| m5C / pseudouridine, motif route | 20 | 3 | 0.40 |
+
+The stricter gate applies **only to m5C/pseudouridine motif retention**
+(codes 3–6). Known-site candidates retain the original depth ≥10 and AF ≥0.10
+criteria. `filtering.auxiliary_motif_min_depth` and
+`filtering.auxiliary_motif_min_af` configure the extra motif gate and default
+to 20 and 0.40 even when omitted. Initial candidate settings remain under
+`candidates`; m6A/inosine and the neural network are unchanged. The templates
+also enable six motif rules:
 
 ```yaml
 filtering:
   reference_only_targets: [m5C, pseU]
+  auxiliary_motif_min_depth: 20
+  auxiliary_motif_min_af: 0.40
   m6a_drach_keep: true
   m6a_mettl16_keep: true
+  m5c_nsun6_keep: true
+  m5c_nsun2_keep: true
+  pseu_trub1_keep: true
+  pseu_pus7_keep: true
 ```
 
-The latter retains original m6A candidates matching RNA `UAC[m6A]GAGAA`
+`m6a_mettl16_keep` retains original m6A candidates matching RNA `UAC[m6A]GAGAA`
 (DNA `TACAGAGAA`, candidate A at position 4) in the candidate's strand orientation,
 even when the neural network rejects them. Only this exact nine-base motif is
 used; the broader `UAC[m6A]GARAA` pattern is not retained by this rule.
@@ -164,6 +184,13 @@ candidates. Like DRACH retention, it applies to original m6A candidates in WT
 and IVT samples. Set `m6a_mettl16_keep: false` to disable it; an omitted key
 defaults to `false` for existing configurations. This additional retention policy
 does not change the trained network or the reported classifier-only results.
+The four additional rules retain original m5C or pseudouridine candidates
+that pass the stricter motif thresholds and match the patterns below, even
+without a reference match. They also
+apply to WT and IVT candidates; known-site retention remains WT-only. Set each
+key to `false` to disable it. Omitted keys default to `false` in older YAML.
+The `reference_only_targets` name is retained for the branch that bypasses the
+neural network; enabled m5C/Ψ motif rules apply there too.
 
 ```bash
 # Inspect configuration without opening BAM or starting inference.
@@ -198,16 +225,31 @@ original candidate was retained:
 |---|---|
 | `flag_db` | `1`: matches an applicable database site in a WT sample |
 | `flag_short_read` | `1`: matches an applicable published experimental site in a WT sample |
-| `flag_nn` | `1`: the neural network classifier predicts the candidate's original modification |
-| `motif_keep` | `0`: neither enabled motif rule applied; `1`: DRACH; `2`: canonical METTL16 motif |
+| `flag_nn` | `1`: the classifier predicts the original m6A/inosine target; always `0` for m5C/pseudouridine |
+| `motif_keep` | `0`: no motif rule applied; `1`–`6`: the applied motif code below |
 | `filter_pass` | `1`: at least one retention rule passed; only these rows are exported |
+
+| Motif code | Original candidate | Strand-oriented RNA pattern |
+|---|---|---|
+| `1` | m6A | DRACH, candidate at the central A |
+| `2` | m6A | Canonical METTL16 `UAC[m6A]GAGAA` |
+| `3` | m5C | NSUN6-associated `[m5C]UCCA` |
+| `4` | m5C | NSUN2-associated G-rich `[m5C]NGGG` |
+| `5` | pseudouridine | TRUB1-associated `GU[Ψ]CNANNC` |
+| `6` | pseudouridine | Classic PUS7-associated `UG[Ψ]AR` |
+
+N={A,C,G,U} and R={A,G}; brackets locate the candidate. These rules test
+sequence, not RNA structure or enzyme activity. Matching a motif does not
+confirm modification. Broader METTL16 or PUS7 motifs are not included.
 
 Several flags can support the same candidate. A zero indicates that the
 corresponding retention rule did not apply; it does not establish that the site
 is unmodified. In particular, `motif_keep=0` can reflect a disabled motif rule,
 and the candidate can still pass through another flag. Comment headers explain
 the columns in combined and modification-specific BED files. Detailed TSVs keep
-the two motif flags separately and include rejected candidates and source IDs.
+the six motif flags separately and include rejected candidates and source IDs.
+For m5C/Ψ, `auxiliary_motif_eligible=0` prevents codes 3–6 from being applied,
+but a matching known site can still have a reference flag and PASS=1.
 See the [output flag guide and worked example](docs/OUTPUT_FLAGS.md) and the
 [prediction guide](prediction/README.md).
 
@@ -222,8 +264,10 @@ See the [output flag guide and worked example](docs/OUTPUT_FLAGS.md) and the
 Set `genome` in YAML or override it with `--genome`. A matching softmasked FASTA
 and FAI are required during preparation for every genome, including workflows
 using only reference-based filtering. No liftover or chromosome renaming is
-performed. For `other`, m5C and pseudouridine return no sites because references
-are disabled. Cross-species NN performance has not been evaluated.
+performed. For `other`, m5C and pseudouridine can pass enabled motif rules even
+though reference retention is disabled. Review motif suitability for the species
+and disable rules that are not justified. Cross-species NN performance has not
+been evaluated.
 
 The four mouse RMBase source archives are included. Generate their ignored BED
 and provenance files once after cloning:
@@ -268,7 +312,7 @@ examples; a database or another assay can supply either target. The current
 network jointly classifies m6A, inosine and background, so it needs positive
 examples for **both modifications** and paired WT/IVT sequencing inputs. A
 positive-site file alone cannot replace the tagged BAMs and negative control.
-m5C and pseudouridine remain reference-only targets.
+m5C and pseudouridine use known-site/motif retention without NN training.
 Sources can be mixed: for example, use GLORI m6A sites with database inosine
 sites, or Slic-seq inosine sites with database m6A sites.
 

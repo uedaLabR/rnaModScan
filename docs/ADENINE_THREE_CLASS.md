@@ -71,12 +71,15 @@ validation/testは混同行列、各class precision/recall/F1、macro-F1、accur
 - `flag_nn`: 3クラスargmaxが元候補の修飾と一致。
 - `flag_drach`: 保持設定が有効な元m6A DRACH候補。Inosineでは常に0。
 - `flag_mettl16`: 保持設定が有効な元m6A候補で、RNA鎖方向の`UAC[m6A]GAGAA`に一致。Inosineでは常に0。
+- `flag_nsun6`/`flag_nsun2`: 元m5C候補で有効なNSUN6 `[m5C]UCCA` / NSUN2関連G-rich `[m5C]NGGG`の規則に一致。
+- `flag_trub1`/`flag_pus7`: 元ψ候補で有効なTRUB1 `GU[Ψ]CNANNC` / PUS7 `UG[Ψ]AR`の規則に一致。
 
-どれかが1なら`filter_pass=1`。m5C/ψのNN/DRACH/METTL16フラグは0。
-IVTはDB/short-readフラグ0だが、元DRACH/METTL16モチーフ保持は同じ規則で適用する。
+どれかが1なら`filter_pass=1`。m5C/ψの既知部位は元のdepth ≥10・修飾read ≥3・AF ≥0.10で保持する。モチーフフラグだけは追加のdepth ≥20・AF ≥0.40が必要で、設定は`filtering.auxiliary_motif_min_depth`/`auxiliary_motif_min_af`（省略時も20/0.40）。`auxiliary_motif_eligible=0`でも、既知部位フラグとPASSは1になりうる。m5C/ψのNN/DRACH/METTL16フラグは0。
+IVTはDB/short-readフラグ0だが、元候補の6種類のモチーフ保持は同じ規則で適用する。
 `filtering.m6a_mettl16_keep`はpublic/Docker設定で有効、既存YAMLで省略時はfalse。
 対象Aは9塩基の4番目（DNA表現`TACAGAGAA`）で、拡張モチーフ`UAC[m6A]GARAA`は含めない。
 元候補のdepth/AF/read条件を維持し、NNで除外された対象も追加規則で保持する。モチーフ一致だけではMETTL16依存性を証明しない。
+新しいm5C/ψ規則も二次構造や酵素依存性を検査しない。詳細TSVは独立9フラグ、公開BEDは`motif_keep`に6種類をまとめたコード0–6を記録する。[全コードと設定](OUTPUT_FLAGS.md#motif-codes)を参照。
 NNは3クラスのままで、閾値とargmaxを混同しない。
 同じ位置の両修飾がPASSしてもよい。元のdepth/AF条件を通過しない別修飾の行を生成しない。
 `final_class`は部位auditでは返却修飾のセミコロン列、修飾別auditでは保持時の当該修飾（除外時は空欄）。

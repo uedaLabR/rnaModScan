@@ -4,10 +4,10 @@
 
 1. 対象BAMをmodkitでpileupする。既存bedMethylを指定してこの工程を省くこともできる。
 2. 総depth・修飾call数・AFで候補を抽出する。
-3. m5C/ψは既知部位と一致する候補だけを最終返却する。BAM特徴・NNは使わない。
+3. m5C/ψは既知部位または有効な修飾別モチーフ規則に一致する元候補を返却する。既知部位は元の10 read・AF 0.10条件、モチーフ規則だけは20 read・AF 0.40を追加する（修飾readは元の3本以上）。モチーフは鎖方向のFASTA配列で判定し、BAM特徴・NNは使わない。
 4. m6A/InosineはA部位の和集合を作り、候補グループごとにBAMを読む。
 5. 既存と同じ19塩基・18readチャネル等の特徴を、染色体・strand別Parquetへ保存する。
-6. 別プロセスで3クラスNNを実行し、DB/short-read/NN/DRACH/METTL16モチーフの独立フラグORによる最終判定を行う。
+6. 別プロセスでm6A/inosineの3クラスNNを実行し、DB/short-read/NNと対象に対応するモチーフの独立フラグORで最終判定する。
 7. 必要なら、除外対象のMLを0にしたBAMを出力する。
 
 ## AFは低確信度readを分母に含める
@@ -19,7 +19,7 @@ AF = N_mod / (N_valid_cov + N_fail + N_diff + N_nocall)
 `N_mod`はmodkitがML確信度フィルターを適用して数えた対象修飾call。
 分母は低確信度の`N_fail`、異なる塩基の`N_diff`、判定不能の`N_nocall`も含む。
 削除readは従来どおり除外する。splice skipも塩基の観測として数えない。
-depth≥10・対象修飾call≥3・AF≥0.1の既定と、学習時のAFを維持する。
+depth≥10・対象修飾call≥3・AF≥0.1の共通既定と、学習時のAFを維持する。m5C/ψのモチーフ保持だけにはdepth≥20・AF≥0.40を追加し、既知部位保持とm6A/inosineの条件は維持する。
 AFは監査・出力用に保持し、NNには入力しない。
 
 modkitのbedMethylの割合は`N_mod/N_valid_cov`で、上式とは異なる。
@@ -137,10 +137,10 @@ ParquetはすでにZstd圧縮・dictionary encodingを使っているため、�
 
 ## 最終出力と確認
 
-元bedMethylのPASS行は`predictions/bedmethyl/filtered.bed`、修飾別は同階層の`{target}/filtered.bed`。元列に`flag_db, flag_short_read, flag_nn, motif_keep, filter_pass`を追記する。`motif_keep`は0=モチーフ保持なし、1=DRACH保持、2=代表METTL16モチーフ保持とし、各BEDのコメントヘッダーで説明する。詳細TSVでは`flag_drach`/`flag_mettl16`の二つのbinaryフラグを独立に保存する。
+元bedMethylのPASS行は`predictions/bedmethyl/filtered.bed`、修飾別は同階層の`{target}/filtered.bed`。元列に`flag_db, flag_short_read, flag_nn, motif_keep, filter_pass`を追記する。`motif_keep`は0=モチーフ保持なし、1=DRACH、2=代表METTL16、3=NSUN6、4=NSUN2関連G-rich、5=TRUB1、6=PUS7とし、各BEDのコメントヘッダーで説明する。詳細TSVではDB/short-read/NNと6種類のモチーフの独立9フラグを保存する。
 `filtering.m6a_mettl16_keep`が有効なら、対象Aが4番目のRNA鎖方向`UAC[m6A]GAGAA`に一致する元m6A候補を、NN判定と独立に保持する。拡張モチーフや新規候補行は加えない。
 修飾別`predictions/{target}/kept_sites.tsv`が返却部位の詳細表。
-m5C/ψはdepth・AFを通過し、既知部位に一致する行だけを含む。
+m5C/ψは元のdepth ≥10・修飾read ≥3・AF ≥0.10を通過し、既知部位または有効なモチーフ規則に一致する行を含む。モチーフ保持だけは`filtering.auxiliary_motif_min_depth`（既定20）と`filtering.auxiliary_motif_min_af`（既定0.40）を追加し、古いroutingでも最終filterで再確認する。既知部位は追加閾値を満たさなくても保持する。既知部位フラグはWTのみ、モチーフ規則はWT/IVT双方に適用する。[モチーフ一覧・設定](OUTPUT_FLAGS.md#motif-codes)を参照。配列一致は二次構造や修飾の実在を証明しない。
 `all_predictions.tsv`は除外理由も含む監査表として残し、BAMの除外mapにも使う。
 m6A/Inosineの共通NN・独立フラグORの詳細は[3クラス設計](ADENINE_THREE_CLASS.md)を参照。
 

@@ -11,7 +11,7 @@ mm10はRMBase3.0のみ、otherはDB/short-readを使用しない。以下のGRCh
 現行は候補閾値を維持してm6A/Inosineの和集合を作る。[統合A部位・3クラス仕様](ADENINE_THREE_CLASS.md)参照。
 
 2026-11-05追記：候補の閾値・定義は以下を維持し、学習前にm6A/Inosineの部位選択を追加。
-m5C/ψは既知部位との一致で返却する。[最新方針](TRAINING_PREDICTION_POLICY.md)参照。
+m5C/ψは既知部位、または有効な修飾別モチーフ規則との一致で返却する。既知部位の条件は元のdepth ≥10・修飾read ≥3・AF ≥0.10のまま、モチーフ保持だけにdepth ≥20・AF ≥0.40を追加する。[最新方針](TRAINING_PREDICTION_POLICY.md)参照。
 
 学習の入口は `python training/test/01_sites.py --config training/config.yaml`。
 設定はYAMLへ集約し、実装本体は`training/site_lists.py`、出力は`output_dir/sites/`です。
@@ -25,7 +25,7 @@ plain `.bed`、gzip `.gz`/`.bgz` を読み、bedMethylは染色体内の座標�
 同一座標/鎖/修飾コードの重複を確認します。8種や未知のコードも読み捨てず `mod_code` に保持し、
 4対象以外の `modification` はNoneにします。用途側で対象を選びます。
 
-候補条件は総リード数≥10、対象修飾リード数≥3、AF≥0.1。
+候補の共通既定は総リード数≥10、対象修飾リード数≥3、AF≥0.1。m5C/ψのモチーフによる最終保持にはdepth ≥20・AF ≥0.40を追加するが、既知部位保持やm6A/inosine・学習条件は変更しない。設定は`filtering.auxiliary_motif_min_depth`（既定20）と`filtering.auxiliary_motif_min_af`（既定0.40）。
 
 ```text
 total_reads = N_valid_cov + N_fail + N_diff + N_nocall

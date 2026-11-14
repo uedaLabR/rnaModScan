@@ -204,16 +204,26 @@ def load_config(path, mode=None, *, genome=None):
             raise ValueError('modkit.threads must be a positive integer')
         modkit['include_bed'] = resolve_path(modkit['include_bed'], path.parent)
         filtering = config.setdefault('filtering', {})
-        check_keys(filtering, {'reference_only_targets', 'm6a_drach_keep', 'm6a_mettl16_keep'}, 'filtering')
+        motif_options = ('m5c_nsun6_keep', 'm5c_nsun2_keep', 'pseu_trub1_keep', 'pseu_pus7_keep')
+        check_keys(filtering, {'reference_only_targets', 'm6a_drach_keep', 'm6a_mettl16_keep',
+                               'auxiliary_motif_min_depth', 'auxiliary_motif_min_af', *motif_options}, 'filtering')
         filtering.setdefault('reference_only_targets', ['m5C', 'pseU'])
         filtering.setdefault('m6a_drach_keep', False)
         filtering.setdefault('m6a_mettl16_keep', False)
+        from prediction.auxiliary import validate_auxiliary_motif_thresholds
+        filtering.setdefault('auxiliary_motif_min_depth', 20)
+        filtering.setdefault('auxiliary_motif_min_af', .40)
+        validate_auxiliary_motif_thresholds(filtering['auxiliary_motif_min_depth'], filtering['auxiliary_motif_min_af'])
+        for option in motif_options:
+            filtering.setdefault(option, False)
+            if not isinstance(filtering[option], bool):
+                raise ValueError('filtering.' + option + ' must be boolean')
         reference_only = filtering['reference_only_targets']
         if (not isinstance(reference_only, list) or len(reference_only) != len(set(reference_only))
                 or any(target not in ('m5C', 'pseU') for target in reference_only)):
             raise ValueError('filtering.reference_only_targets accepts m5C and pseU')
         if ({'m5C', 'pseU'} & set(targets)) - set(reference_only):
-            raise ValueError('m5C and pseU targets require reference-only filtering')
+            raise ValueError('m5C and pseU targets require policy filtering via reference_only_targets')
         if not isinstance(filtering['m6a_drach_keep'], bool):
             raise ValueError('filtering.m6a_drach_keep must be boolean')
         if not isinstance(filtering['m6a_mettl16_keep'], bool):

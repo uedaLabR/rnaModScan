@@ -32,7 +32,7 @@ class FilteredBedTest(unittest.TestCase):
                                                   ('chr2', 30, '-', 'pseU', [0, 0, 0, 0, 0])]:
                 writer.writerow(dict(sample_id='sample', chrom=chrom, start=start, strand=strand,
                                      modification=mod, final_keep=int(any(flags)), filter_pass=int(any(flags)),
-                                     **dict(zip(FLAG_FIELDS, flags))))
+                                     **dict(zip(FLAG_FIELDS, flags+[0]*4))))
         return source, directory, lines
 
     def test_preserves_values_extra_columns_order_and_separate_flags(self):
@@ -51,7 +51,7 @@ class FilteredBedTest(unittest.TestCase):
             self.assertTrue(all_lines[0].startswith('#'))
             self.assertEqual(report['schema'],'filtered_bedmethyl_v3')
             self.assertEqual(report['appended_columns'],['flag_db','flag_short_read','flag_nn','motif_keep','filter_pass'])
-            self.assertEqual(set(report['motif_keep_encoding']),{'0','1','2'})
+            self.assertEqual(set(report['motif_keep_encoding']),set(map(str, range(7))))
             for target in ['m6A','inosine','m5C','pseU']:
                 content=(root/'out'/target/'filtered.bed').read_text()
                 self.assertTrue(content.startswith('#'))
@@ -79,8 +79,9 @@ class FilteredBedTest(unittest.TestCase):
             path=decisions/'all_predictions.tsv'
             with path.open(newline='') as handle:
                 reader=csv.DictReader(handle,delimiter='\t')
-                fields=[name for name in reader.fieldnames if name!='flag_mettl16']
-                rows=[{key:value for key,value in row.items() if key!='flag_mettl16'} for row in reader]
+                optional={'flag_mettl16','flag_nsun6','flag_nsun2','flag_trub1','flag_pus7'}
+                fields=[name for name in reader.fieldnames if name not in optional]
+                rows=[{key:value for key,value in row.items() if key not in optional} for row in reader]
             with path.open('w',newline='') as handle:
                 writer=csv.DictWriter(handle,fields,delimiter='\t');writer.writeheader();writer.writerows(rows)
             export_filtered_bed(source,[decisions],'sample',root/'out')

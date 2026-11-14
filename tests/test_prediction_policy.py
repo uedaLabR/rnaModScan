@@ -117,7 +117,8 @@ class PredictionPolicyTest(unittest.TestCase):
                     writer.writeheader()
                     for pos, strand in sites:
                         writer.writerow(dict(row_id=f'{target}:{pos}', sample_id='sample', chrom='chr1',
-                            start=pos, end=pos+1, strand=strand, modification=target))
+                            start=pos, end=pos+1, strand=strand, modification=target,
+                            total_reads=10, modified_reads=3, af=.3))
             route_prediction_sites(candidates, root / 'routing', ['m6A', 'm5C'],
                 dict(reference_only_targets=['m5C', 'pseU'], m6a_drach_keep=True), fasta)
             with (root / 'routing/m6A/nn_sites.tsv').open() as handle:

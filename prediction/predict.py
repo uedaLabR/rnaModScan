@@ -9,14 +9,19 @@ from utils.nn.inputs import CHANNEL_NAMES, MODIFICATIONS
 from utils.references.catalog import ReferenceCatalog, sha256
 from utils.features.index import INDEX_FIELDS, completed_run
 from prediction.model_bundle import load_model_bundle, validate_input_schema
-from prediction.motifs import mettl16_site
+from prediction.motifs import (mettl16_site, POLICY_FLAG_FIELDS, policy_motif_flags,
+                               motif_keep_code)
 from utils.references.genome import candidate_nonamer
+from prediction.auxiliary import (AUXILIARY_TARGETS, auxiliary_motif_eligible,
+                                  validate_auxiliary_motif_thresholds)
 
 DECISION_FIELDS = ['reference_cell', 'condition', 'prediction_status', 'keep_score', 'nn_keep',
                    'short_read_sources', 'database_sources', 'reference_overlap', 'rescued',
                    'drach_keep', 'mettl16_keep', 'mettl16_motif', 'final_keep', 'final_reason', 'score_m6A', 'score_inosine',
                    'score_false_positive', 'nn_class', 'final_class',
-                   'flag_db', 'flag_short_read', 'flag_nn', 'flag_drach', 'flag_mettl16', 'filter_pass']
+                   'flag_db', 'flag_short_read', 'flag_nn', 'flag_drach', 'flag_mettl16',
+                   *POLICY_FLAG_FIELDS, 'motif_keep', 'auxiliary_motif_eligible',
+                   'auxiliary_motif_min_depth', 'auxiliary_motif_min_af', 'filter_pass']
 
 
 def site_decision(score, threshold, has_reference, condition='WT'):
@@ -70,7 +75,8 @@ def _load_model(directory):
 
 
 def write_predictions(index_path, scores, out, catalog, reference_cell, condition, threshold,
-                      model_provenance=None, site_fields=None, source_sites=None, class_scores=None):
+                      model_provenance=None, site_fields=None, source_sites=None, class_scores=None,
+                      auxiliary_motif_min_depth=20, auxiliary_motif_min_af=.40):
     """Write all candidates, including zero-read sites, with auditable decisions.
 
     scores maps row_id to a model score. Coordinates and source evidence are
@@ -79,6 +85,7 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
     if not reference_cell or any(c.isspace() for c in reference_cell):
         raise ValueError('Set an explicit reference_cell')
     site_decision(None, threshold, False, condition)  # Validate policies before output.
+    validate_auxiliary_motif_thresholds(auxiliary_motif_min_depth, auxiliary_motif_min_af)
     index_path, out = Path(index_path), Path(out)
     out.mkdir(parents=True, exist_ok=False)
     (out / 'INCOMPLETE.txt').write_text('Prediction not complete.', encoding='utf-8')
@@ -106,6 +113,8 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                 short = [s for s in matches if source_by_id[s]['kind'] == 'short_read']
                 database = [s for s in matches if source_by_id[s]['kind'] == 'database']
                 mode = row.get('filter_mode') or 'nn'
+                is_auxiliary = row['modification'] in AUXILIARY_TARGETS
+                eligible = auxiliary_motif_eligible(row, auxiliary_motif_min_depth, auxiliary_motif_min_af)
                 drach_keep = mode == 'nn_drach_keep'
                 mettl16_keep = mode == 'nn_mettl16_keep'
                 if mode in ('nn', 'nn_drach_keep', 'nn_mettl16_keep'):
@@ -137,17 +146,32 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                              flag_short_read=int(condition == 'WT' and bool(short)),
                              flag_nn=int(decision['nn_keep'] == 1), flag_drach=int(drach_keep),
                              flag_mettl16=int(mettl16_keep))
+                policy_flags = policy_motif_flags(row)
+                if any(policy_flags.values()) and mode != 'reference_only':
+                    raise ValueError('m5C/psi motifs require a policy-only candidate')
+                flags.update(policy_flags)
+                if is_auxiliary and not eligible:
+                    # Known-site evidence uses the original candidate thresholds;
+                    # only the independent motif rule has the stronger cutoffs.
+                    flags.update(dict.fromkeys(POLICY_FLAG_FIELDS, 0))
+                motif_code = motif_keep_code(int(drach_keep), int(mettl16_keep),
+                                              *[flags[name] for name in POLICY_FLAG_FIELDS])
                 final_keep = any(flags.values())
                 # Separate evidence columns are independent; any one retains the original candidate.
                 decision.update(final_keep=int(final_keep),
                                 rescued=int(bool(flags['flag_db'] or flags['flag_short_read'])
                                             and not flags['flag_nn']) if mode != 'reference_only' else 0)
-                if joint_score is not None:
+                if joint_score is not None or any(policy_flags.values()):
                     reasons = [name.removeprefix('flag_') for name, value in flags.items() if value]
                     decision['final_reason'] = '+'.join(reasons) if reasons else 'filter_fail'
+                if is_auxiliary and not eligible and not final_keep:
+                    decision.update(final_reason='auxiliary_motif_below_threshold', rescued=0)
                 record = dict(row, reference_cell=reference_cell, condition=condition, prediction_status=status,
                               keep_score='' if score is None else score, drach_keep=int(drach_keep),
-                              mettl16_keep=int(mettl16_keep),
+                              mettl16_keep=int(mettl16_keep), motif_keep=motif_code,
+                              auxiliary_motif_eligible=int(eligible) if is_auxiliary else '',
+                              auxiliary_motif_min_depth=auxiliary_motif_min_depth if is_auxiliary else '',
+                              auxiliary_motif_min_af=auxiliary_motif_min_af if is_auxiliary else '',
                               mettl16_motif=row.get('mettl16_motif') or candidate_nonamer(row.get('reference_sequence')),
                               short_read_sources=';'.join(short),
                               database_sources=';'.join(database), reference_overlap=int(bool(matches)), **decision, **flags, filter_pass=int(final_keep))
@@ -215,11 +239,13 @@ def write_predictions(index_path, scores, out, catalog, reference_cell, conditio
                       model=model_provenance, reference_cell=reference_cell, condition=condition, threshold=threshold,
                       reference_catalog=str(catalog.path) if catalog.path is not None else None,
                       reference_sources=catalog.sources,
-                      policies=dict(reference_only='m5C/psi: keep known WT candidates only; blank NN score',
+                      auxiliary_motif_thresholds=dict(min_depth=auxiliary_motif_min_depth, min_modified=3, min_af=auxiliary_motif_min_af),
+                      policies=dict(reference_only='m5C/psi: keep known WT candidates or enabled sequence-motif matches; blank NN score',
                                     drach='when enabled, score all m6A candidates and retain DRACH independently of NN score',
                                     mettl16='when enabled, retain original m6A candidates with canonical UAC[m6A]GAGAA independently of NN; not the expanded GARAA motif',
                                     rescue='WT candidates only; exact chromosome/BED0 start/strand/target modification',
-                                    output='original candidates only; PASS is OR of independent DB, short-read, NN, DRACH and METTL16-motif flags',
+                                    output='original candidates only; PASS is OR of independent DB, short-read, NN and six sequence-motif flags',
+                                    policy_motifs='NSUN6/NSUN2/TRUB1/PUS7-associated sequence rules apply to native and IVT candidates when enabled; RNA structure and enzymatic modification are not established by a match',
                                     ivt='no reference rescue; neural score retained for background-call auditing',
                                     missing_prediction='keep blank score/status; reference rescue may retain WT candidates',
                                     interpretation='neural filtering and reference-based rescue decisions, not independent experimental truth',

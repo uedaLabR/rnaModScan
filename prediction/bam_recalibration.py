@@ -33,6 +33,11 @@ def read_site_decision(row):
         flags = evidence_values(row)
         if row['final_keep'] != str(int('1' in flags)):
             raise ValueError('Final decision must agree with independent evidence flags')
+        if (row['modification'] in ('m5C','pseU') and '1' in flags[5:]
+                and row.get('auxiliary_motif_min_depth') not in (None,'')):
+            from prediction.auxiliary import auxiliary_motif_eligible
+            if not auxiliary_motif_eligible(row,int(row['auxiliary_motif_min_depth']),float(row['auxiliary_motif_min_af'])):
+                raise ValueError('Motif-retained m5C/psi decision violates its recorded auxiliary motif thresholds')
     if row['prediction_status'] == 'reference_only':
         if (row['modification'] not in ('m5C', 'pseU') or row['keep_score'] or row['nn_keep']
                 or row['rescued'] != '0'):
@@ -371,7 +376,7 @@ def write_filtered_bam(bam_path, prediction_directories, sample_id, out, *, thre
         report = dict(status='complete', schema='filtered_modification_bam_v1', sample_id=sample_id,
                       input_bam=source_bam, prediction_sources=sources, counts=dict(counts),
                       output_bam=file_info(result), output_index=file_info(final_index), threads=threads,
-                      policies=dict(modification='explicit ML entries at NN- or reference-only-rejected sites become byte 0',
+                      policies=dict(modification='explicit ML entries at NN- or policy-rejected sites become byte 0',
                                     probability='ML byte 0 denotes interval [0,1/256), not base-call Phred quality',
                                     match='exact GRCh38 BED0 chromosome/start/strand/target; no coordinate tolerance',
                                     missing='no_prediction/no_reads are preserved, never treated as negative evidence',

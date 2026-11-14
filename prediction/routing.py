@@ -1,4 +1,4 @@
-"""Route known-site-only candidates around BAM/NN; score every m6A candidate."""
+"""Route policy candidates around BAM/NN; score every m6A candidate."""
 import csv
 import json
 from collections import Counter
@@ -11,8 +11,11 @@ from utils.references.catalog import sha256
 from utils.references.genome import IndexedFasta, drach, mettl16
 from utils.adenine import FIELDS as ADENINE_FIELDS, MODIFICATIONS, combine_site, merged_sites
 from prediction.confidence import AUDIT_FIELDS, combine_confidence
+from prediction.motifs import POLICY_MOTIFS, routed_policy_motif
+from prediction.auxiliary import auxiliary_motif_eligible
 
-ROUTE_FIELDS = ['filter_mode', 'motif', 'motif_group', 'mettl16_motif']
+ROUTE_FIELDS = ['filter_mode', 'motif', 'motif_group', 'mettl16_motif',
+                'policy_motif_code', 'policy_motif_sequence', 'auxiliary_motif_eligible']
 
 
 def route_prediction_sites(candidate_root, out, targets, filtering, fasta_path=None, *, joint=False):
@@ -20,7 +23,8 @@ def route_prediction_sites(candidate_root, out, targets, filtering, fasta_path=N
     completed_run(candidate_root)
     source_hash = sha256(candidate_root / 'run.json')
     source_sites = {target: sha256(candidate_root / target / 'sites.tsv') for target in targets}
-    needs_motif = 'm6A' in targets
+    needs_motif = 'm6A' in targets or any(target in targets and filtering.get(option, False)
+        for code, target, option, flag, pattern, index in POLICY_MOTIFS)
     reference = file_info(fasta_path) if needs_motif else None
     if out.exists():
         run = completed_run(out)
@@ -56,8 +60,14 @@ def route_prediction_sites(candidate_root, out, targets, filtering, fasta_path=N
                     if row['modification'] != target:
                         raise ValueError('Mixed modification in candidate list')
                     mode, motif, group, nonamer = 'nn', '', '', ''
+                    policy_code, policy_sequence = 0, ''
+                    eligible = ''
                     if target in filtering['reference_only_targets']:
                         mode = 'reference_only'
+                        eligible = int(auxiliary_motif_eligible(row, filtering.get('auxiliary_motif_min_depth', 20),
+                                                           filtering.get('auxiliary_motif_min_af', .40)))
+                        if genome is not None and eligible:
+                            policy_code, policy_sequence = routed_policy_motif(genome, row, filtering)
                     elif target == 'm6A' and genome is not None:
                         motif = genome.motif(row['chrom'], int(row['start']), row['strand'])
                         nonamer = genome.context(row['chrom'], int(row['start']), row['strand'], left=3, right=5)
@@ -67,6 +77,8 @@ def route_prediction_sites(candidate_root, out, targets, filtering, fasta_path=N
                         elif filtering.get('m6a_mettl16_keep', False) and mettl16(nonamer):
                             mode = 'nn_mettl16_keep'
                     row.update(filter_mode=mode, motif=motif, motif_group=group, mettl16_motif=nonamer,
+                               policy_motif_code=policy_code, policy_motif_sequence=policy_sequence,
+                               auxiliary_motif_eligible=eligible,
                                retained_depth=0, eligible_depth=0, read_offset=0,
                                features_dir='', reference_sequence='')
                     name = 'policy_sites.tsv' if mode == 'reference_only' else 'nn_sites.tsv'

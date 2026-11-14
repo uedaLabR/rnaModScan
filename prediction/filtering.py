@@ -135,7 +135,7 @@ def combine_partition_predictions(directories, out, empty_fields):
 
 
 def filter_scored_inputs(input_directory, score_directory, out, reference_catalog,
-                         reference_cell, *, condition='WT'):
+                         reference_cell, *, condition='WT', auxiliary_motif_min_depth=20, auxiliary_motif_min_af=.40):
     """Filter completed scores with the exact sites saved before GPU inference."""
     from prediction.predict import DECISION_FIELDS
     from prediction.input_parquet import SITE_FIELDS
@@ -186,6 +186,7 @@ def filter_scored_inputs(input_directory, score_directory, out, reference_catalo
                 raise ValueError('Scored IDs differ from the prepared readable sites')
             write_predictions(temporary_index, scores, directory, catalog, reference_cell, condition,
                               inputs['threshold'], site_fields=fields, source_sites=site_file,
+                              auxiliary_motif_min_depth=auxiliary_motif_min_depth, auxiliary_motif_min_af=auxiliary_motif_min_af,
                               model_provenance=dict(model=inputs['model'],
                                   scores=str(score_directory.resolve()) if score_directory is not None else None))
             temporary_index.unlink()
@@ -199,6 +200,7 @@ def filter_scored_inputs(input_directory, score_directory, out, reference_catalo
                       score_directory=str(score_directory.resolve()) if score_directory is not None else None,
                       score_run_sha256=sha256(score_directory / 'run.json') if score_directory is not None else None,
                       threshold=inputs['threshold'], reference_cell=reference_cell, condition=condition,
+                      auxiliary_motif_thresholds=dict(min_depth=auxiliary_motif_min_depth,min_modified=3,min_af=auxiliary_motif_min_af),
                       partitions=partitions, interpretation='NN decisions and reference rescue; not experimental truth')
         (out / 'run.json').write_text(json.dumps(report, indent=2), encoding='utf-8')
         (out / 'INCOMPLETE.txt').unlink()

@@ -218,7 +218,7 @@ class Mettl16RetentionTest(unittest.TestCase):
             self.assertEqual(returned[1][-5:],['0','0','0','2','1'])
             self.assertEqual(returned[2][-5:],['0','0','0','1','1'])
             self.assertEqual(report['appended_columns'],['flag_db','flag_short_read','flag_nn','motif_keep','filter_pass'])
-            self.assertEqual(set(report['motif_keep_encoding']),{'0','1','2'})
+            self.assertEqual(set(report['motif_keep_encoding']),set(map(str, range(7))))
             self.assertTrue((root/'bed/filtered.bed').read_text().startswith('#'))
             original={r.split('\t')[1]:r for r in source.read_text().splitlines()}
             self.assertTrue(all('\t'.join(r[:-5])==original[r[1]] for r in returned))

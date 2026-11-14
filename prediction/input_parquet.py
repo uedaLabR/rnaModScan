@@ -17,7 +17,7 @@ INPUT_NAMES = ('sequence_tokens', 'read_features', 'read_mask', 'sequence_repeat
 SITE_FIELDS = list(INDEX_FIELDS) + [name for name in POSITION_FIELDS if name not in INDEX_FIELDS]
 SITE_FIELDS += [name for name in AUDIT_FIELDS if name not in SITE_FIELDS]
 SITE_FIELDS += [field.name for field in metadata_fields() if field.name not in SITE_FIELDS]
-SITE_FIELDS += ['mettl16_motif']
+SITE_FIELDS += ['mettl16_motif', 'policy_motif_code', 'policy_motif_sequence', 'auxiliary_motif_eligible']
 
 
 def partition_directory(chrom, strand):
@@ -112,7 +112,7 @@ def add_policy_sites(partitions, path, seen, target):
 
 
 def prepare_policy_inputs(site_path, target, out, *, position_sites=None):
-    """Persist reference-only site metadata without a BAM, model or read tensors."""
+    """Persist known-site/motif policy metadata without BAM or neural tensors."""
     pa, pq = require_arrow()
     positions, position_source = checked_position_annotations(position_sites)
     partitions = {}
@@ -136,7 +136,7 @@ def prepare_policy_inputs(site_path, target, out, *, position_sites=None):
         report = dict(status='complete', schema='prediction_inputs_v9', target=target,
                       model=None, input_schema=None, threshold=.5, partitions=manifest,
                       policy_sites_sha256=sha256(site_path), position_annotation=position_source,
-                      policies=dict(filtering='known-site overlap only; no neural score'))
+                      policies=dict(filtering='known-site overlap or enabled sequence motif; no neural score'))
         (out / 'run.json').write_text(json.dumps(report, indent=2) + '\n')
         (out / 'INCOMPLETE.txt').unlink()
         return report
