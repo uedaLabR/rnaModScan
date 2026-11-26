@@ -15,6 +15,16 @@ motif rules are recorded separately. Their OR determines retention.
 Reference-based retention applies to WT samples. The input BAM is preserved; writing a
 new filtered BAM is optional.
 
+## Citation and version
+
+The software version is **v1.0.0** (Python package version `1.0.0`). Author,
+affiliation and verified ORCID metadata are in [CITATION.cff](CITATION.cff) and
+[.zenodo.json](.zenodo.json). Zenodo uses `.zenodo.json` when both files are
+present. The DOI and release date will be added after publication; neither has
+been assigned in this preparation. See the
+[v1.0.0 preparation record](docs/releases/v1.0.0-preparation.md) for the author
+sources, archive checks and outstanding reference-data redistribution checks.
+
 ## Installation
 
 The included HEK293T + HeLa deployment model was trained with **Python 3.10 on Linux
@@ -33,8 +43,8 @@ python -m rnamodscan --help
 python -m rnamodscan predict --help
 ```
 
-The pinned requirements record the working environment; a fresh installation
-has not yet been validated. The same TensorFlow package supports CPU inference
+The pinned requirements record the checkpoint-compatible environment.
+The same TensorFlow package supports CPU inference
 with `--device cpu`. GPU use also requires a compatible NVIDIA driver, CUDA 11.2
 and cuDNN 8.1; see the [TensorFlow compatibility table](https://www.tensorflow.org/install/source#gpu).
 
@@ -102,7 +112,12 @@ Check the distributed files from the repository root:
 The model loader also checks the input schema, class order and weight checksum.
 The manuscript's HeLa analysis used separate HEK293T-only weights; those
 performance results are not an independent evaluation of the pooled deployment
-model. The prepared human reference BEDs and provenance JSON are also included
+model. The exact HEK293T evaluation checkpoint and its original `run.json` are
+also included in
+[`models/HEK293T_evaluation_20261124/`](models/HEK293T_evaluation_20261124/README.md),
+with checksums and instructions for selecting it explicitly. The default model
+selection remains the pooled deployment model. The prepared human reference
+BEDs and provenance JSON are also included
 as described below. Supply your own matching genome FASTA/FAI and sample inputs;
 analysis outputs are not distributed with the code.
 
@@ -384,6 +399,8 @@ docs/         Design and workflow documentation
 
 Virtual environments, credentials, large generated data, training outputs, local
 manuscript files and manuscript-generation scripts are excluded from Git. The
-verified deployment bundle above is the explicitly included model. Source code is
+verified deployment and evaluation bundles above are explicitly included. Source code is
 distributed under the [MIT License](LICENSE); third-party reference datasets
-retain their own terms and attribution.
+retain their own terms and attribution. See [THIRD_PARTY_DATA.md](THIRD_PARTY_DATA.md)
+for source citations, transformations and redistribution questions that must be
+resolved before publishing the release.

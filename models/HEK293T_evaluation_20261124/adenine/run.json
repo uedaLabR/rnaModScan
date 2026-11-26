@@ -1,0 +1,134 @@
+{
+  "status": "complete",
+  "role": "final_all_labeled_sites",
+  "target": "adenine",
+  "model": {
+    "target": "adenine",
+    "window": 19,
+    "read_channels": 18,
+    "max_reads": 300,
+    "sampling_seed": 42,
+    "sequence_embedding": 16,
+    "attention_heads": 2,
+    "transformer_ff": 32,
+    "read_hidden_dim": 16,
+    "read_attention_heads": 2,
+    "read_transformer_ff": 32,
+    "read_embedding": 64,
+    "dropout": 0.2
+  },
+  "model_file": "model.keras",
+  "model_sha256": "f7d4db59edc72f5df8ed361bfb1475a4d384b7a91cf06d06764dc0d55cd5af1d",
+  "feature_set": "sequence_reads_repeat18_v1",
+  "threshold": 0.5,
+  "input_schema": {
+    "feature_set": "sequence_reads_repeat18_v1",
+    "missing_ml": "zero",
+    "window": 19,
+    "modification_channels": [
+      "m6A",
+      "inosine",
+      "m5C",
+      "pseU",
+      "2OmeA",
+      "2OmeC",
+      "2OmeG",
+      "2OmeU"
+    ],
+    "read_channel_names": [
+      "ml_m6A",
+      "ml_inosine",
+      "ml_m5C",
+      "ml_pseU",
+      "ml_2OmeA",
+      "ml_2OmeC",
+      "ml_2OmeG",
+      "ml_2OmeU",
+      "inverse_quality",
+      "log1p_insertion",
+      "base_match",
+      "base_A",
+      "base_C",
+      "base_G",
+      "base_T",
+      "base_N",
+      "splice_before_log_distance",
+      "splice_after_log_distance"
+    ],
+    "splice_distance": "same_read_CIGAR_N_query_bases_adjacent_exon_zero",
+    "splice_distance_cap": 1000,
+    "splice_missing_distance": 1000,
+    "splice_distance_transform": "log1p(min(d,1000))/log1p(1000)",
+    "sequence_repeat_mask": "softmasked_FASTA_lowercase_acgt",
+    "repeat_mask_window": 19,
+    "ml_transform": "ML/255",
+    "quality_transform": "1/(Q+1)",
+    "window_mode": "genomic",
+    "orientation": "RNA_5to3",
+    "max_reads": 300,
+    "sampling_seed": 42,
+    "class_names": [
+      "m6A",
+      "inosine",
+      "false_positive"
+    ]
+  },
+  "index_path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/cell_models/HEK293T/adenine/data/index/sites.tsv",
+  "index_sha256": "1b649030d225bb828e59ca105cadffeb12bb489eb72c1af4635cc4f46adf44bf",
+  "feature_sources": [
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/samples/HEK293T_IVT",
+      "run_sha256": "8fdba8e86788e81fc12f53cc65385d7319c2ccdf7cefbc162e24ab310f530e25"
+    },
+    {
+      "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/features/samples/HEK293T_WT",
+      "run_sha256": "e9a0b6fe6c2947bd13e7596fa07dc320941de5d4078a7cf0e6d26734b4b165c5"
+    }
+  ],
+  "training_rows": 325971,
+  "epochs": 8,
+  "class_weights": {
+    "2": 0.5391523968779307,
+    "0": 0.9089821561524883,
+    "1": 22.170373393185063
+  },
+  "seed": 42,
+  "learning_rate": 0.0003,
+  "tensorflow_version": "2.10.1",
+  "training_scope": {
+    "cell": "HEK293T",
+    "sample_ids": [
+      "HEK293T_IVT",
+      "HEK293T_WT"
+    ],
+    "conditions": [
+      "IVT",
+      "WT"
+    ]
+  },
+  "epoch_policy": "best validation epoch from training cell only",
+  "epoch_selection": {
+    "status": "complete",
+    "training_cell": "HEK293T",
+    "best_epoch": 8,
+    "class_weights": {
+      "2": 0.5392431494511474,
+      "0": 0.9088014076304475,
+      "1": 22.124585218702865
+    },
+    "history_sha256": "17c2be691ceeedc396cde8c5c04e1209c05ca4cd972cebcb226831fbdd9a79d5",
+    "model_sha256": "acccb9ee2220a10b9e3e311a6cf425bbc357679e3db939d173b5630d7356d822",
+    "validation_manifest_sha256": "9078495df1c0eedb68753b9209424dbe6af3e519bfa5dec78fc9fbc6ee8f74fc",
+    "validation_role": "early stopping only; not a held-out test"
+  },
+  "source_cell_datasets": {
+    "path": "/home/ueda/PycharmProjects/rnaModScan/results/training_v10/cell_datasets",
+    "run_sha256": "edb294fc218559b7d85c7c6858698f4a8b1cadd5720eb222dbf0b9538b0afe00",
+    "files_sha256": {
+      "HEK293T/adenine/train/sites.tsv": "217309679327628e2d54f7b847d1bf50e6fba3b0e680a8bb9a1a8092dcb8e8a3",
+      "HEK293T/adenine/validation/sites.tsv": "9078495df1c0eedb68753b9209424dbe6af3e519bfa5dec78fc9fbc6ee8f74fc",
+      "HeLa/adenine/sites.tsv": "a213b2daa92587f1cde9b6fd4cfccc8b81670bc7c85f70dfa4b2eb814f6c2cd7"
+    }
+  },
+  "evaluation": "no held-out evaluation after refit; separate cell was not used"
+}

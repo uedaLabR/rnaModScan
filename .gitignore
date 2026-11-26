@@ -106,6 +106,9 @@ analysis/**/results/
 # Verified deployment model distributed with the source tree.
 !/models/pooled_HEK293T_HeLa_20261111/adenine/model.keras
 
+# Frozen HEK293T checkpoint used for the manuscript's HeLa evaluation.
+!/models/HEK293T_evaluation_20261124/adenine/model.keras
+
 # Local manuscript work, scripts, snapshots and transfer records
 /paper/
 /manuscript/

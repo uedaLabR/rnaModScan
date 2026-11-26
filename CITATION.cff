@@ -1,0 +1,46 @@
+cff-version: 1.2.0
+message: If you use rnaModScan, please cite the software using this metadata.
+type: software
+title: rnaModScan
+version: v1.0.0
+authors:
+- family-names: Ueda
+  given-names: Hiroki
+  affiliation: Department of Molecular Oncology, Graduate School of Medicine, Chiba University, Chiba-shi,
+    Japan; Health and Disease Omics Center, Chiba University, Chiba-shi, Japan; Division of Advanced Data
+    Science, Research Center for Advanced Science and Technology, The University of Tokyo, Tokyo, Japan
+  orcid: https://orcid.org/0000-0001-9135-7117
+- family-names: Nagae
+  given-names: Genta
+  affiliation: Genome Science & Medicine Laboratory, Research Center for Advanced Science and Technology,
+    The University of Tokyo, Tokyo, Japan; Laboratory of Molecular Pathology, Institute of Medicine, University
+    of Tsukuba
+  orcid: https://orcid.org/0000-0002-2929-7990
+- family-names: Aburatani
+  given-names: Hiroyuki
+  affiliation: Genome Science & Medicine Laboratory, Research Center for Advanced Science and Technology,
+    The University of Tokyo, Tokyo, Japan
+  orcid: https://orcid.org/0000-0003-0438-1544
+- family-names: Kaneda
+  given-names: Atsushi
+  affiliation: Department of Molecular Oncology, Graduate School of Medicine, Chiba University, Chiba-shi,
+    Japan; Health and Disease Omics Center, Chiba University, Chiba-shi, Japan
+  orcid: https://orcid.org/0000-0002-6980-5515
+repository-code: https://github.com/uedaLabR/rnaModScan
+url: https://github.com/uedaLabR/rnaModScan
+license: MIT
+abstract: rnaModScan filters nanopore direct RNA sequencing modification calls using Dorado modification
+  scores, local sequence and read features. A shared neural classifier distinguishes m6A, inosine and
+  false-positive candidates; m5C and pseudouridine have auxiliary reference- and motif-based reporting.
+  The source archive includes dependency specifications, CPU/GPU Docker build files, prepared human reference
+  maps with provenance, mouse RMBase source archives, the HEK293T evaluation checkpoint used for the manuscript's
+  HeLa analyses, and a separate pooled HEK293T/HeLa deployment model. The supplied checkpoints require
+  the documented TensorFlow 2.10.1/Keras 2.10.0 runtime. Third-party reference data retain their original
+  terms and attribution; the software MIT License does not relicense those datasets.
+keywords:
+- RNA modifications
+- nanopore direct RNA sequencing
+- m6A
+- inosine
+- deep learning
+- bioinformatics
